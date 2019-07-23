@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 
+//TODO: remove this class with its xml
 /**
  * A simple {@link Fragment} subclass.
  */
