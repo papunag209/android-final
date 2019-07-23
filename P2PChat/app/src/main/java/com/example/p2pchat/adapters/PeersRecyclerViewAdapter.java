@@ -1,0 +1,59 @@
+package com.example.p2pchat.adapters;
+
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.p2pchat.R;
+
+import java.util.ArrayList;
+import java.util.List;
+
+
+public class PeersRecyclerViewAdapter extends RecyclerView.Adapter<PeersRecyclerViewAdapter.ViewHolder>{
+    private static final String TAG = "PeersRecyclerViewAdapte";
+    List<String> peers;
+
+    public PeersRecyclerViewAdapter() {
+        super();
+        peers = new ArrayList<>();
+        peers.add("abcd");
+        peers.add("1234");
+        peers.add("!@#$");
+        peers.add("abcd");
+        peers.add("1234");
+        peers.add("!@#$");
+    }
+
+    @NonNull
+    @Override
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.chat_peer_recycler_item, parent, false);
+        ViewHolder holder = new ViewHolder(view);
+        return holder;
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        holder.textView.setText(peers.get(position));
+    }
+
+    @Override
+    public int getItemCount() {
+        return peers.size();
+    }
+
+    class ViewHolder extends  RecyclerView.ViewHolder{
+        TextView textView;
+
+        public ViewHolder(@NonNull View itemView) {
+            super(itemView);
+            textView = itemView.findViewById(R.id.textView_peerName);
+        }
+    }
+}

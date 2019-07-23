@@ -92,13 +92,9 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_home) {
             navController.navigate(R.id.mainFragment);
-        } else if (id == R.id.nav_gallery) {
+        } else if (id == R.id.nav_history) {
             navController.navigate(R.id.dummyFragment);
-        } else if (id == R.id.nav_slideshow) {
-            navController.navigate(R.id.mainFragment);
-
-        } else if (id == R.id.nav_tools) {
-            navController.navigate(R.id.mainFragment);
+        } else {
 
         }
 

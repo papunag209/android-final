@@ -4,14 +4,22 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.p2pchat.adapters.PeersRecyclerViewAdapter;
+
 
 public class MainFragment extends Fragment {
+    RecyclerView recyclerView;
+
     public MainFragment() {
         // Required empty public constructor
     }
@@ -24,6 +32,14 @@ public class MainFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_main, container, false);
     }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        recyclerView = view.findViewById(R.id.recyclerView_chatPeers);
+        PeersRecyclerViewAdapter adapter = new PeersRecyclerViewAdapter();
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(App.getContext()));
+    }
 
     @Override
     public void onAttach(Context context) {
