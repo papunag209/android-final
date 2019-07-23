@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.nav_home) {
             navController.navigate(R.id.mainFragment);
         } else if (id == R.id.nav_history) {
-            navController.navigate(R.id.dummyFragment);
+            navController.navigate(R.id.historyFragment);
         } else {
 
         }
