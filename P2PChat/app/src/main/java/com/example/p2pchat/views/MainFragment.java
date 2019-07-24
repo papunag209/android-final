@@ -37,9 +37,10 @@ public class MainFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         recyclerView = view.findViewById(R.id.recyclerView_chatPeers);
-        PeersRecyclerViewAdapter adapter = new PeersRecyclerViewAdapter();
-        recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(App.getContext()));
+        //TODO NEED TO GIVE PEER LIST HERE
+//        PeersRecyclerViewAdapter adapter = new PeersRecyclerViewAdapter();
+//        recyclerView.setAdapter(adapter);
+//        recyclerView.setLayoutManager(new LinearLayoutManager(App.getContext()));
     }
 
     @Override

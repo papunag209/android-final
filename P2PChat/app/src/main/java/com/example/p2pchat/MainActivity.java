@@ -1,12 +1,30 @@
 package com.example.p2pchat;
 
+import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.net.wifi.p2p.WifiP2pDevice;
+import android.net.wifi.p2p.WifiP2pDeviceList;
+import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 
+import com.example.p2pchat.adapters.PeersRecyclerViewAdapter;
+import com.example.p2pchat.receivers.WifiBroadcastReceiver;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import android.provider.Settings;
 import android.view.View;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 
@@ -22,15 +40,85 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import android.view.Menu;
+import android.widget.ArrayAdapter;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     NavController navController;
+    WifiP2pManager wManager;
+    WifiP2pManager.Channel wChannel;
+    BroadcastReceiver wReceiver;
+    IntentFilter wFilter;
+
+    String[] appPerms = {Manifest.permission.INTERNET, Manifest.permission.ACCESS_WIFI_STATE,
+            Manifest.permission.CHANGE_NETWORK_STATE, Manifest.permission.ACCESS_NETWORK_STATE,
+            Manifest.permission.CHANGE_WIFI_STATE};
+
+    WifiP2pManager.PeerListListener peerListListener;
+
+    List<WifiP2pDevice> peers;
+
+
+    private static final int PERMISSION_REQ_CODE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (checkPermissions()) {
+            startApp();
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(wReceiver, wFilter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(wReceiver);
+    }
+
+    private void startApp() {
+        wManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
+        wChannel = wManager.initialize(this, getMainLooper(), null);
+        peerListListener = new WifiP2pManager.PeerListListener() {
+            @Override
+            public void onPeersAvailable(WifiP2pDeviceList wifiP2pDeviceList) {
+                //TODO Change this
+                if (!wifiP2pDeviceList.equals(peers)) {
+                    peers.clear();
+                    peers.addAll(wifiP2pDeviceList.getDeviceList());
+
+                    ArrayList<String> peerNames = new ArrayList<>();
+
+                    for (WifiP2pDevice device : wifiP2pDeviceList.getDeviceList()) {
+                        peerNames.add(device.deviceName);
+                    }
+                    //TODO DISPLAY DATA WITH ADAPTER
+                    PeersRecyclerViewAdapter adapter = new PeersRecyclerViewAdapter(peerNames);
+
+
+                }
+            }
+        };
+        wReceiver = new WifiBroadcastReceiver(wChannel, wManager, peerListListener);
+        peers = new ArrayList<>();
+        wFilter = new IntentFilter();
+        wFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
+        wFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
+        wFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
+        wFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
+
+        discoverPeers();
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -49,6 +137,103 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
         navController = Navigation.findNavController(this, R.id.navHostFragment);
+    }
+
+    private void discoverPeers() {
+        wManager.discoverPeers(wChannel, new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+                //Started discovery
+            }
+
+            @Override
+            public void onFailure(int i) {
+                //failed ot start discovery
+            }
+        });
+    }
+
+    private boolean checkPermissions() {
+        ArrayList<String> permissionsNeeded = new ArrayList<>();
+
+        for (int i = 0; i < appPerms.length; i++) {
+            if (ContextCompat.checkSelfPermission(this, appPerms[i]) != PackageManager.PERMISSION_GRANTED) {
+                permissionsNeeded.add(appPerms[i]);
+            }
+        }
+        if (permissionsNeeded.size() > 0) {
+            ActivityCompat.requestPermissions(this, permissionsNeeded.toArray(new String[permissionsNeeded.size()]), PERMISSION_REQ_CODE);
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode != PERMISSION_REQ_CODE) {
+            return;
+        }
+        ArrayList<String> permsMissing = new ArrayList<>();
+        for (int i = 0; i < grantResults.length; i++) {
+            if (grantResults[i] == PackageManager.PERMISSION_DENIED) {
+                permsMissing.add(permissions[i]);
+            }
+        }
+        if (permsMissing.isEmpty()) {
+            startApp();
+        } else {
+            for (int i = 0; i < permsMissing.size(); i++) {
+                String permNeeded = permsMissing.get(i);
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, permNeeded)) {
+                    popUpDialogue("Grant Permission", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                            checkPermissions();
+                        }
+                    }, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                            finish();
+                        }
+                    });
+                } else {
+                    popUpDialogue("Go to Settings", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                            Intent goToSettingsIntent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                    Uri.fromParts("package", getPackageName(), null));
+                            goToSettingsIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(goToSettingsIntent);
+                            finish();
+                        }
+                    }, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                            finish();
+                        }
+                    });
+
+                }
+            }
+        }
+    }
+
+    public AlertDialog popUpDialogue(String positiveLabel,
+                                     DialogInterface.OnClickListener positiveOnClick,
+                                     DialogInterface.OnClickListener negativeOnClick) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setCancelable(false);
+        builder.setMessage("This app needs all listed permissions to run");
+        builder.setPositiveButton(positiveLabel, positiveOnClick);
+        builder.setNegativeButton("Exit App", negativeOnClick);
+
+        AlertDialog alert = builder.create();
+        alert.show();
+        return alert;
     }
 
     @Override
