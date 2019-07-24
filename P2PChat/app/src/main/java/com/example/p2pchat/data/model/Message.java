@@ -4,7 +4,6 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
-import java.sql.Time;
 
 import static androidx.room.ForeignKey.CASCADE;
 
@@ -19,7 +18,7 @@ public class Message {
 
     Long SessionId;
 
-    Time MessageTime;
+    String MessageTime;
 
     String MessageStatus;
 }

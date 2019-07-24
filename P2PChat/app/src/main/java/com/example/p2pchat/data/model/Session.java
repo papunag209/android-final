@@ -4,6 +4,7 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 import java.sql.Time;
+import java.sql.Timestamp;
 
 @Entity
 public class Session {
@@ -11,7 +12,7 @@ public class Session {
     @PrimaryKey(autoGenerate = true)
     Long SessionId;
 
-    Time SessionStartTime;
+    String SessionStartTime;
 
     String PeerPhoneName;
 }
