@@ -16,18 +16,19 @@ import java.util.List;
 
 
 public class PeersRecyclerViewAdapter extends RecyclerView.Adapter<PeersRecyclerViewAdapter.ViewHolder>{
-    private static final String TAG = "PeersRecyclerViewAdapte";
+    private static final String TAG = "PeersRecyclerViewAdapter";
     List<String> peers;
 
-    public PeersRecyclerViewAdapter() {
+    public PeersRecyclerViewAdapter(ArrayList<String> peers) {
         super();
-        peers = new ArrayList<>();
-        peers.add("abcd");
-        peers.add("1234");
-        peers.add("!@#$");
-        peers.add("abcd");
-        peers.add("1234");
-        peers.add("!@#$");
+        this.peers = peers;
+//        peers = new ArrayList<>();
+//        peers.add("abcd");
+//        peers.add("1234");
+//        peers.add("!@#$");
+//        peers.add("abcd");
+//        peers.add("1234");
+//        peers.add("!@#$");
     }
 
     @NonNull
