@@ -1,7 +1,6 @@
-package com.example.p2pchat;
+package com.example.p2pchat.views;
 
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -14,6 +13,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.p2pchat.App;
+import com.example.p2pchat.R;
 import com.example.p2pchat.adapters.PeersRecyclerViewAdapter;
 
 
