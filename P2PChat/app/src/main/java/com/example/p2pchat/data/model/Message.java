@@ -21,4 +21,36 @@ public class Message {
     String MessageTime;
 
     String MessageStatus;
+
+    public Long getMessageId() {
+        return MessageId;
+    }
+
+    public void setMessageId(Long messageId) {
+        MessageId = messageId;
+    }
+
+    public Long getSessionId() {
+        return SessionId;
+    }
+
+    public void setSessionId(Long sessionId) {
+        SessionId = sessionId;
+    }
+
+    public String getMessageTime() {
+        return MessageTime;
+    }
+
+    public void setMessageTime(String messageTime) {
+        MessageTime = messageTime;
+    }
+
+    public String getMessageStatus() {
+        return MessageStatus;
+    }
+
+    public void setMessageStatus(String messageStatus) {
+        MessageStatus = messageStatus;
+    }
 }
