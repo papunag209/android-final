@@ -15,4 +15,28 @@ public class Session {
     String SessionStartTime;
 
     String PeerPhoneName;
+
+    public Long getSessionId() {
+        return SessionId;
+    }
+
+    public void setSessionId(Long sessionId) {
+        SessionId = sessionId;
+    }
+
+    public String getSessionStartTime() {
+        return SessionStartTime;
+    }
+
+    public void setSessionStartTime(String sessionStartTime) {
+        SessionStartTime = sessionStartTime;
+    }
+
+    public String getPeerPhoneName() {
+        return PeerPhoneName;
+    }
+
+    public void setPeerPhoneName(String peerPhoneName) {
+        PeerPhoneName = peerPhoneName;
+    }
 }
