@@ -21,10 +21,13 @@ import com.example.p2pchat.MainActivity;
 import com.example.p2pchat.R;
 import com.example.p2pchat.adapters.PeersRecyclerViewAdapter;
 
+import java.util.List;
+
 
 public class MainFragment extends Fragment {
     private static final String TAG = "MainFragment";
     RecyclerView recyclerView;
+    PeersRecyclerViewAdapter recyclerViewAdapter;
 
 
     public MainFragment() {
@@ -43,18 +46,21 @@ public class MainFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         recyclerView = view.findViewById(R.id.recyclerView_chatPeers);
-        MutableLiveData<String> peers = ((MainActivity)getActivity()).getPeerNames();
-        peers.observe(this, new Observer<String>() {
+//        recyclerViewAdapter = (PeersRecyclerViewAdapter)recyclerView.getAdapter();
+        final MutableLiveData<List<String>> peers = ((MainActivity)getActivity()).getPeerNames();
+        peers.observe(this, new Observer<List<String>>() {
             @Override
-            public void onChanged(String s) {
-                Log.d(TAG,s);
+            public void onChanged(List<String> s) {
+                Log.d(TAG,""+s);
+                ((PeersRecyclerViewAdapter)recyclerView.getAdapter()).setDataSet(s);
+
             }
         });
         //TODO NEED TO GIVE PEER LIST HERE
-//        PeersRecyclerViewAdapter adapter = new PeersRecyclerViewAdapter();
-//        recyclerView.setAdapter(adapter);
-//        recyclerView.setLayoutManager(new LinearLayoutManager(App.getContext()));
-//        Log.d(TAG, "onViewCreated: ACTIVITY" + getActivity());
+        PeersRecyclerViewAdapter adapter = new PeersRecyclerViewAdapter(null);
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(App.getContext()));
+        Log.d(TAG, "onViewCreated: ACTIVITY" + getActivity());
     }
 
     @Override

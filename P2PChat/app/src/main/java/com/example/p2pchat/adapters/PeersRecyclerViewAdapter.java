@@ -45,7 +45,13 @@ public class PeersRecyclerViewAdapter extends RecyclerView.Adapter<PeersRecycler
 
     @Override
     public int getItemCount() {
+        if (peers == null) return 0;
         return peers.size();
+    }
+
+    public void setDataSet(List<String> s){
+        peers = s;
+        notifyDataSetChanged();
     }
 
     class ViewHolder extends  RecyclerView.ViewHolder{

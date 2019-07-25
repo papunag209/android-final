@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pManager;
@@ -19,6 +20,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
 import android.provider.Settings;
+import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -45,6 +47,7 @@ import androidx.navigation.Navigation;
 
 import android.view.Menu;
 import android.widget.ArrayAdapter;
+import android.widget.Toast;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -52,24 +55,43 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+    private static final String TAG = "MainActivity";
     NavController navController;
     WifiP2pManager wManager;
     WifiP2pManager.Channel wChannel;
     BroadcastReceiver wReceiver;
-    IntentFilter wFilter;
+    IntentFilter wFilter = new IntentFilter();
 
     String[] appPerms = {Manifest.permission.INTERNET, Manifest.permission.ACCESS_WIFI_STATE,
             Manifest.permission.CHANGE_NETWORK_STATE, Manifest.permission.ACCESS_NETWORK_STATE,
-            Manifest.permission.CHANGE_WIFI_STATE};
+            Manifest.permission.CHANGE_WIFI_STATE, Manifest.permission.ACCESS_FINE_LOCATION};
 
-    WifiP2pManager.PeerListListener peerListListener;
+    WifiP2pManager.PeerListListener peerListListener = new WifiP2pManager.PeerListListener() {
+        @Override
+        public void onPeersAvailable(WifiP2pDeviceList wifiP2pDeviceList) {
+            //TODO Change this
+            peers.clear();
+            peers.addAll(wifiP2pDeviceList.getDeviceList());
 
-    List<WifiP2pDevice> peers;
-    MutableLiveData<String> peerNames;
+            ArrayList<String> namesLst = new ArrayList<>();
+            Log.d(TAG, "onPeersAvailable: " + namesLst);
+            for (WifiP2pDevice device : wifiP2pDeviceList.getDeviceList()) {
+                namesLst.add(device.deviceName);
+            }
+            Log.d(TAG, "onPeersAvailable: " + namesLst);
+            peerNames.postValue(namesLst);
+
+            //TODO DISPLAY DATA WITH ADAPTER
+//                    PeersRecyclerViewAdapter adapter = new PeersRecyclerViewAdapter(peerNames);
+        }
+    };;
+
+    List<WifiP2pDevice> peers = new ArrayList<>();
+    MutableLiveData<List<String>> peerNames = new MutableLiveData<>();
 
     private static final int PERMISSION_REQ_CODE = 1;
 
-    public MutableLiveData<String> getPeerNames(){
+    public MutableLiveData<List<String>> getPeerNames(){
         return this.peerNames;
     }
 
@@ -95,42 +117,23 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void startApp() {
-
-        peerNames = new MutableLiveData<>();
+//        WifiManager wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+//        wifiManager.setWifiEnabled(true);
+//        wifiManager.setWifiEnabled(false);
 
         wManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         wChannel = wManager.initialize(this, getMainLooper(), null);
         wReceiver = new WifiBroadcastReceiver(wChannel, wManager, peerListListener);
-        peers = new ArrayList<>();
-        wFilter = new IntentFilter();
+
         wFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
         wFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
         wFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         wFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
 
 
-        peerListListener = new WifiP2pManager.PeerListListener() {
-            @Override
-            public void onPeersAvailable(WifiP2pDeviceList wifiP2pDeviceList) {
-                //TODO Change this
-                peers.clear();
-                peers.addAll(wifiP2pDeviceList.getDeviceList());
-
-
-                for (WifiP2pDevice device : wifiP2pDeviceList.getDeviceList()) {
-                    peerNames.postValue(device.deviceName);
-                }
-                //TODO DISPLAY DATA WITH ADAPTER
-//                    PeersRecyclerViewAdapter adapter = new PeersRecyclerViewAdapter(peerNames);
 
 
 
-            }
-        };
-
-
-
-        discoverPeers();
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -140,6 +143,9 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+
+                discoverPeers();
+
             }
         });
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -150,18 +156,19 @@ public class MainActivity extends AppCompatActivity
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
         navController = Navigation.findNavController(this, R.id.navHostFragment);
+
     }
 
     private void discoverPeers() {
         wManager.discoverPeers(wChannel, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
-                //Started discovery
+                Toast.makeText(MainActivity.this,"Started Discovery",Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onFailure(int i) {
-                //failed ot start discovery
+                Toast.makeText(MainActivity.this,"Ended Discovery " + i,Toast.LENGTH_SHORT).show();
             }
         });
     }
