@@ -1,6 +1,7 @@
 package com.example.p2pchat.views;
 
 import android.content.Context;
+import android.net.wifi.p2p.WifiP2pDevice;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -21,6 +22,8 @@ import com.example.p2pchat.MainActivity;
 import com.example.p2pchat.R;
 import com.example.p2pchat.adapters.PeersRecyclerViewAdapter;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 
@@ -47,19 +50,32 @@ public class MainFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         recyclerView = view.findViewById(R.id.recyclerView_chatPeers);
 //        recyclerViewAdapter = (PeersRecyclerViewAdapter)recyclerView.getAdapter();
-        final MutableLiveData<List<String>> peers = ((MainActivity)getActivity()).getPeerNames();
-        peers.observe(this, new Observer<List<String>>() {
+        final MutableLiveData<Collection<WifiP2pDevice>> peers = ((MainActivity)getActivity()).getPeers();
+        peers.observe(this, new Observer<Collection<WifiP2pDevice>>() {
             @Override
-            public void onChanged(List<String> s) {
+            public void onChanged(Collection<WifiP2pDevice> s) {
                 Log.d(TAG,""+s);
-                ((PeersRecyclerViewAdapter)recyclerView.getAdapter()).setDataSet(s);
+                ArrayList<String> names = new ArrayList<String>();
+                for(WifiP2pDevice device : s){
+                    names.add(device.deviceName);
+                }
+                ((PeersRecyclerViewAdapter)recyclerView.getAdapter()).setDataSet(names);
 
             }
         });
         //TODO NEED TO GIVE PEER LIST HERE
-        PeersRecyclerViewAdapter adapter = new PeersRecyclerViewAdapter(null);
+        PeersRecyclerViewAdapter adapter = new PeersRecyclerViewAdapter(null, new PeersRecyclerViewAdapter.OnRecycleItem() {
+            @Override
+            public void onClick(int position) {
+//                final WifiP2pDevice device = ;
+                Log.d(TAG, "onClick: "+position);
+
+            }
+        });
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(App.getContext()));
+
+
         Log.d(TAG, "onViewCreated: ACTIVITY" + getActivity());
     }
 

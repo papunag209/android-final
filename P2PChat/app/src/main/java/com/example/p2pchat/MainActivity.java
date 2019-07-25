@@ -51,6 +51,7 @@ import android.widget.Toast;
 
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
@@ -69,30 +70,21 @@ public class MainActivity extends AppCompatActivity
     WifiP2pManager.PeerListListener peerListListener = new WifiP2pManager.PeerListListener() {
         @Override
         public void onPeersAvailable(WifiP2pDeviceList wifiP2pDeviceList) {
-            //TODO Change this
-            peers.clear();
-            peers.addAll(wifiP2pDeviceList.getDeviceList());
 
-            ArrayList<String> namesLst = new ArrayList<>();
-            Log.d(TAG, "onPeersAvailable: " + namesLst);
-            for (WifiP2pDevice device : wifiP2pDeviceList.getDeviceList()) {
-                namesLst.add(device.deviceName);
-            }
-            Log.d(TAG, "onPeersAvailable: " + namesLst);
-            peerNames.postValue(namesLst);
+            Log.d(TAG, "onPeersAvailable: " + wifiP2pDeviceList.getDeviceList());
+            peers.postValue(wifiP2pDeviceList.getDeviceList());
 
             //TODO DISPLAY DATA WITH ADAPTER
 //                    PeersRecyclerViewAdapter adapter = new PeersRecyclerViewAdapter(peerNames);
         }
     };;
 
-    List<WifiP2pDevice> peers = new ArrayList<>();
-    MutableLiveData<List<String>> peerNames = new MutableLiveData<>();
+    MutableLiveData<Collection<WifiP2pDevice>> peers = new MutableLiveData<>();
 
     private static final int PERMISSION_REQ_CODE = 1;
 
-    public MutableLiveData<List<String>> getPeerNames(){
-        return this.peerNames;
+    public MutableLiveData<Collection<WifiP2pDevice>> getPeers(){
+        return this.peers;
     }
 
     @Override
