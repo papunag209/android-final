@@ -36,6 +36,10 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
@@ -61,9 +65,13 @@ public class MainActivity extends AppCompatActivity
     WifiP2pManager.PeerListListener peerListListener;
 
     List<WifiP2pDevice> peers;
-
+    MutableLiveData<String> peerNames;
 
     private static final int PERMISSION_REQ_CODE = 1;
+
+    public MutableLiveData<String> getPeerNames(){
+        return this.peerNames;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,28 +95,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void startApp() {
+
+        peerNames = new MutableLiveData<>();
+
         wManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         wChannel = wManager.initialize(this, getMainLooper(), null);
-        peerListListener = new WifiP2pManager.PeerListListener() {
-            @Override
-            public void onPeersAvailable(WifiP2pDeviceList wifiP2pDeviceList) {
-                //TODO Change this
-                if (!wifiP2pDeviceList.equals(peers)) {
-                    peers.clear();
-                    peers.addAll(wifiP2pDeviceList.getDeviceList());
-
-                    ArrayList<String> peerNames = new ArrayList<>();
-
-                    for (WifiP2pDevice device : wifiP2pDeviceList.getDeviceList()) {
-                        peerNames.add(device.deviceName);
-                    }
-                    //TODO DISPLAY DATA WITH ADAPTER
-                    PeersRecyclerViewAdapter adapter = new PeersRecyclerViewAdapter(peerNames);
-
-
-                }
-            }
-        };
         wReceiver = new WifiBroadcastReceiver(wChannel, wManager, peerListListener);
         peers = new ArrayList<>();
         wFilter = new IntentFilter();
@@ -116,6 +107,28 @@ public class MainActivity extends AppCompatActivity
         wFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
         wFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         wFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
+
+
+        peerListListener = new WifiP2pManager.PeerListListener() {
+            @Override
+            public void onPeersAvailable(WifiP2pDeviceList wifiP2pDeviceList) {
+                //TODO Change this
+                peers.clear();
+                peers.addAll(wifiP2pDeviceList.getDeviceList());
+
+
+                for (WifiP2pDevice device : wifiP2pDeviceList.getDeviceList()) {
+                    peerNames.postValue(device.deviceName);
+                }
+                //TODO DISPLAY DATA WITH ADAPTER
+//                    PeersRecyclerViewAdapter adapter = new PeersRecyclerViewAdapter(peerNames);
+
+
+
+            }
+        };
+
+
 
         discoverPeers();
 
