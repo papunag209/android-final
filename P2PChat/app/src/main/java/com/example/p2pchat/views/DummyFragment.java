@@ -6,6 +6,8 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,6 +21,7 @@ import com.example.p2pchat.data.model.Message;
 import com.example.p2pchat.data.model.Session;
 
 import java.util.Calendar;
+import java.util.List;
 
 
 //TODO: remove this class with its xml
@@ -70,11 +73,27 @@ public class DummyFragment extends Fragment {
         Log.d(TAG, "populateDb: session id from obj: " + sessionId);
 
         Message m = new Message();
+        m.setMessageTime(Calendar.getInstance().getTime().toString());
+        m.setSessionId(sessionId);
+        m.setMessageText("Oee sada xar?");
+        dao.inserMessage(m);
+        m.setMessageTime(Calendar.getInstance().getTime().toString());
+        m.setMessageText("aq var brat shen sada xar");
+        dao.inserMessage(m);
+
+        LiveData<List<Message>> messages = dao.getMessages(sessionId);
+        messages.observe(this, new Observer<List<Message>>() {
+            @Override
+            public void onChanged(List<Message> messages) {
+                Log.d(TAG, "onChanged: messages: " + messages);
+            }
+        });
     }
 
     void clearDb(){
         DataDao dao = Database.getInstance().dataDao();
         dao.clearMessages();
         dao.clearSessions();
+        Log.d(TAG, "clearDb: Cleared kinda");
     }
 }

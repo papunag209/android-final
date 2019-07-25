@@ -24,5 +24,9 @@
         android:id="@+id/chatFragment"
         android:name="com.example.p2pchat.views.ChatFragment"
         android:label="fragment_chat"
-        tools:layout="@layout/fragment_chat" />
+        tools:layout="@layout/fragment_chat" >
+        <argument
+            android:name="SessionId"
+            app:argType="long" />
+    </fragment>
 </navigation>

@@ -22,6 +22,8 @@ public class Message {
 
     String MessageStatus;
 
+    String MessageText;
+
     public Long getMessageId() {
         return MessageId;
     }
@@ -52,5 +54,18 @@ public class Message {
 
     public void setMessageStatus(String messageStatus) {
         MessageStatus = messageStatus;
+    }
+
+    public String getMessageText() {
+        return MessageText;
+    }
+
+    public void setMessageText(String messageText) {
+        MessageText = messageText;
+    }
+
+    @Override
+    public String toString() {
+        return this.getMessageText() + "|" + this.getMessageId() + "|" + this.getMessageTime();
     }
 }
