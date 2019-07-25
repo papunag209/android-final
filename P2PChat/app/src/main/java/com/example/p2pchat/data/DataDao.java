@@ -3,6 +3,7 @@ package com.example.p2pchat.data;
 
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Update;
@@ -27,6 +28,9 @@ public interface DataDao {
     @Update
     void updateSession(Session session);
 
+    @Query("delete from Session")
+    void clearSessions();
+
     //Message methods
     @Query("select * from Message where SessionId = :sessionId")
     LiveData<List<Message>> getMessages(Long sessionId);
@@ -36,4 +40,9 @@ public interface DataDao {
 
     @Update
     void updateMessage(Message message);
+
+    @Query("delete from Message")
+    void clearMessages();
+
+
 }

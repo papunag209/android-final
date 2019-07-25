@@ -278,8 +278,8 @@ public class MainActivity extends AppCompatActivity
             navController.navigate(R.id.mainFragment);
         } else if (id == R.id.nav_history) {
             navController.navigate(R.id.historyFragment);
-        } else {
-
+        } else if (id == R.id.nav_debug){
+            navController.navigate(R.id.dummyFragment);
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);

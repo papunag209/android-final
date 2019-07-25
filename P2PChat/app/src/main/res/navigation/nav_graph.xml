@@ -9,11 +9,7 @@
         android:id="@+id/mainFragment"
         android:name="com.example.p2pchat.views.MainFragment"
         android:label="fragment_main"
-        tools:layout="@layout/fragment_main" >
-        <action
-            android:id="@+id/action_mainFragment_to_dummyFragment"
-            app:destination="@id/dummyFragment" />
-    </fragment>
+        tools:layout="@layout/fragment_main" />
     <fragment
         android:id="@+id/dummyFragment"
         android:name="com.example.p2pchat.views.DummyFragment"
