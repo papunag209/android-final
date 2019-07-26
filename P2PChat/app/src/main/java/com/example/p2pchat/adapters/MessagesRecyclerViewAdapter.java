@@ -31,18 +31,24 @@ public class MessagesRecyclerViewAdapter extends RecyclerView.Adapter<MessagesRe
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.messageText.setText(messages.get(position).getMessageText());
+        holder.messageText.setText(messages.get(position).getMessageText() + "|" + messages.get(position).getMessageTime());
     }
 
     @Override
     public int getItemCount() {
+        if (messages==null) return 0;
         return messages.size();
+    }
+
+    public void updateDataSet(List<Message> messages){
+        this.messages = messages;
+        notifyDataSetChanged();
     }
 
     //todo implement properly based on message status
     @Override
     public int getItemViewType(int position) {
-        return position/2;
+        return position%2;
     }
 
     class ViewHolder extends RecyclerView.ViewHolder{

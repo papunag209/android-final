@@ -8,6 +8,7 @@ import com.example.p2pchat.data.Database;
 import com.example.p2pchat.data.model.Message;
 import com.example.p2pchat.data.model.Session;
 
+import java.util.Calendar;
 import java.util.List;
 
 public class ChatFragmentViewModel extends ViewModel {
@@ -26,5 +27,12 @@ public class ChatFragmentViewModel extends ViewModel {
 
     public LiveData<Session> getSession() {
         return sessionLiveData;
+    }
+
+    public void sendMessage(String m){
+        Message messageToSend = new Message();
+        messageToSend.setMessageText(m);
+        messageToSend.setMessageTime(Calendar.getInstance().getTime().toString());
+        messageToSend.setMessageId(sessionLiveData.getValue().getSessionId());
     }
 }

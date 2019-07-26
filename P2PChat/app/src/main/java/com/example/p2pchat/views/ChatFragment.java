@@ -69,7 +69,9 @@ public class ChatFragment extends Fragment {
             @Override
             public void onChanged(List<Message> messages) {
                 //todo weired action I thing this shoud change the data set too https://www.youtube.com/watch?v=ijXjCtCXcN4&t=375s
-                recyclerAdapter.notifyDataSetChanged();
+                Log.d(TAG, "onChanged: " + messages);
+                recyclerAdapter.updateDataSet(messages);
+//                recyclerAdapter.notifyDataSetChanged();
             }
         });
     }

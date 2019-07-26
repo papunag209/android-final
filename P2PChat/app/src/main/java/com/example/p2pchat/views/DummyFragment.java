@@ -8,11 +8,13 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
+import androidx.navigation.Navigation;
 
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
 import com.example.p2pchat.R;
 import com.example.p2pchat.data.DataDao;
@@ -46,16 +48,28 @@ public class DummyFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        final EditText text = view.findViewById(R.id.editText);
+
         view.findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 populateDb(5);
             }
         });
-        view.findViewById(R.id.button2).setOnClickListener(new View.OnClickListener() {
+        view.findViewById(R.id.button3).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 clearDb();
+            }
+        });
+
+        view.findViewById(R.id.button2).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Long id = Long.parseLong(text.getText().toString());
+                Bundle args = new Bundle();
+                args.putLong("SessionId", id);
+                Navigation.findNavController(view).navigate(R.id.chatFragment, args);
             }
         });
     }
