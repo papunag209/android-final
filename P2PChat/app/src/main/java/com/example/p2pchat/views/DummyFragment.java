@@ -86,14 +86,22 @@ public class DummyFragment extends Fragment {
         Log.d(TAG, "populateDb: session id: "+ sessionId);
         Log.d(TAG, "populateDb: session id from obj: " + sessionId);
 
+        LiveData<Session> sessionLiveData = dao.getSessionById(sessionId);
+        sessionLiveData.observe(this, new Observer<Session>() {
+            @Override
+            public void onChanged(Session session) {
+                Log.d(TAG, "onChanged: session: " + session);
+            }
+        });
+
         Message m = new Message();
         m.setMessageTime(Calendar.getInstance().getTime().toString());
         m.setSessionId(sessionId);
         m.setMessageText("Oee sada xar?");
-        dao.inserMessage(m);
+        dao.insertMessage(m);
         m.setMessageTime(Calendar.getInstance().getTime().toString());
         m.setMessageText("aq var brat shen sada xar");
-        dao.inserMessage(m);
+        dao.insertMessage(m);
 
         LiveData<List<Message>> messages = dao.getMessages(sessionId);
         messages.observe(this, new Observer<List<Message>>() {

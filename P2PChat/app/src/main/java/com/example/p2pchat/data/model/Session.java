@@ -39,4 +39,9 @@ public class Session {
     public void setPeerPhoneName(String peerPhoneName) {
         PeerPhoneName = peerPhoneName;
     }
+
+    @Override
+    public String toString() {
+        return ""+getSessionId()+"|"+getPeerPhoneName()+"|"+getSessionStartTime();
+    }
 }

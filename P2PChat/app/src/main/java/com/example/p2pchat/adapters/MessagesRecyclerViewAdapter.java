@@ -31,7 +31,7 @@ public class MessagesRecyclerViewAdapter extends RecyclerView.Adapter<MessagesRe
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.messageText.setText(messages.get(position).getMessageText() + "|" + messages.get(position).getMessageTime());
+        holder.messageText.setText(messages.get(position).getMessageText() + "\n" + messages.get(position).getMessageTime());
     }
 
     @Override

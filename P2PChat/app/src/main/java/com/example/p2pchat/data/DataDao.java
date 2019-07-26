@@ -22,6 +22,9 @@ public interface DataDao {
     @Query("select * from Session where SessionId = :id")
     LiveData<Session> getSessionById(Long id);
 
+    @Query("select * from Session where SessionId = :id")
+    Session getASession(Long id);
+
     @Insert
     Long insertSession(Session session);
 
@@ -36,7 +39,7 @@ public interface DataDao {
     LiveData<List<Message>> getMessages(Long sessionId);
 
     @Insert
-    Long inserMessage(Message message);
+    Long insertMessage(Message message);
 
     @Update
     void updateMessage(Message message);

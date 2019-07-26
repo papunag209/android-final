@@ -1,5 +1,7 @@
 package com.example.p2pchat.viewModels;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -12,11 +14,15 @@ import java.util.Calendar;
 import java.util.List;
 
 public class ChatFragmentViewModel extends ViewModel {
+    private static final String TAG = "ChatFragmentViewModel";
+    DataDao dao;
     LiveData<List<Message>> messagesListLiveData;
     LiveData<Session> sessionLiveData;
+    Long sessionId;
 
     public void init(Long sessionId){
-        DataDao dao = Database.getInstance().dataDao();
+        this.sessionId = sessionId;
+        dao = Database.getInstance().dataDao();
         sessionLiveData = dao.getSessionById(sessionId);
         messagesListLiveData = dao.getMessages(sessionId);
     }
@@ -33,6 +39,11 @@ public class ChatFragmentViewModel extends ViewModel {
         Message messageToSend = new Message();
         messageToSend.setMessageText(m);
         messageToSend.setMessageTime(Calendar.getInstance().getTime().toString());
-        messageToSend.setMessageId(sessionLiveData.getValue().getSessionId());
+//        messageToSend.setMessageId(sessionLiveData.getValue().getSessionId());
+        messageToSend.setSessionId(sessionId);
+        Log.d(TAG, "sendMessage: session data: " + sessionLiveData.getValue());
+        Log.d(TAG, "sendMessage: message data:" + messagesListLiveData.getValue());
+
+        dao.insertMessage(messageToSend);
     }
 }
