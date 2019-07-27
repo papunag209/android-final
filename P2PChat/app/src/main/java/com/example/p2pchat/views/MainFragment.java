@@ -72,7 +72,7 @@ public class MainFragment extends Fragment {
                 //GETTING CONNECTION
                 final WifiP2pDevice device = peerLst[position];
 
-                MainActivity activity = (MainActivity) ((MainActivity) getActivity());
+                MainActivity activity =(MainActivity) getActivity();
 
                 activity.getConnection(device);
 
