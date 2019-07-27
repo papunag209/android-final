@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.example.p2pchat.App;
 import com.example.p2pchat.R;
@@ -29,6 +30,7 @@ import java.util.List;
  */
 public class HistoryFragment extends Fragment {
     RecyclerView recyclerView;
+    Button clearHistoryButton;
     HistoryRecyclerViewAdapter historyRecyclerViewAdapter;
     HistoryFragmentViewModel historyFragmentViewModel;
 
@@ -43,6 +45,7 @@ public class HistoryFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_history, container, false);
         this.recyclerView = view.findViewById(R.id.recyclerView_historyItems);
+        this.clearHistoryButton = view.findViewById(R.id.button_clearHistory);
         return view;
     }
 
@@ -54,6 +57,16 @@ public class HistoryFragment extends Fragment {
 
         initRecyclerView();
         initObservers();
+        initListeners();
+    }
+
+    private void initListeners() {
+        clearHistoryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                historyFragmentViewModel.deleteAll();
+            }
+        });
     }
 
     private void initObservers() {
