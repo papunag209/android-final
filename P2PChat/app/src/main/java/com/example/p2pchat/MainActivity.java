@@ -19,6 +19,9 @@ import android.os.Bundle;
 
 import com.example.p2pchat.adapters.PeersRecyclerViewAdapter;
 import com.example.p2pchat.receivers.WifiBroadcastReceiver;
+import com.example.p2pchat.threads.ClientSideThread;
+import com.example.p2pchat.threads.SendAndReceive;
+import com.example.p2pchat.threads.ServerSideThread;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -68,6 +71,10 @@ public class MainActivity extends AppCompatActivity
     WifiP2pManager.Channel wChannel;
     BroadcastReceiver wReceiver;
     IntentFilter wFilter = new IntentFilter();
+    ClientSideThread client;
+    SendAndReceive sendAndReceive;
+    ServerSideThread server;
+
 
     String[] appPerms = {Manifest.permission.INTERNET, Manifest.permission.ACCESS_WIFI_STATE,
             Manifest.permission.CHANGE_NETWORK_STATE, Manifest.permission.ACCESS_NETWORK_STATE,
@@ -106,7 +113,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        if(wReceiver != null) {
+        if (wReceiver != null) {
             registerReceiver(wReceiver, wFilter);
         }
     }
@@ -114,7 +121,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onPause() {
         super.onPause();
-        if(wReceiver != null) {
+        if (wReceiver != null) {
             unregisterReceiver(wReceiver);
         }
     }
@@ -126,9 +133,13 @@ public class MainActivity extends AppCompatActivity
             if (wifiP2pInfo.groupFormed && wifiP2pInfo.isGroupOwner) {
                 Log.d(TAG, "onConnectionInfoAvailable: YOU ARE THE HOST");
                 Toast.makeText(MainActivity.this, "YOU ARE THE HOST", Toast.LENGTH_SHORT).show();
+                server = new ServerSideThread(sendAndReceive, handler);
+                server.start();
             } else {
                 Log.d(TAG, "onConnectionInfoAvailable: YOU ARE THE CLIENT");
                 Toast.makeText(MainActivity.this, "YOU ARE THE CLIENT", Toast.LENGTH_SHORT).show();
+                client = new ClientSideThread(groupOwnerAddress, sendAndReceive, handler);
+                client.start();
             }
         }
     };
@@ -155,10 +166,10 @@ public class MainActivity extends AppCompatActivity
     Handler handler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(@NonNull Message message) {
-            switch (message.what){
+            switch (message.what) {
                 case MESSAGE_READ:
                     byte[] readBuff = (byte[]) message.obj;
-                    String tempMsg = new String(readBuff,0,message.arg1);
+                    String tempMsg = new String(readBuff, 0, message.arg1);
                     //TODO MESSAGE ARRIVED
                     Toast.makeText(MainActivity.this, "Message read: " + tempMsg, Toast.LENGTH_SHORT).show();
                     break;

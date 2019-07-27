@@ -51,16 +51,16 @@ public class MainFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         recyclerView = view.findViewById(R.id.recyclerView_chatPeers);
 //        recyclerViewAdapter = (PeersRecyclerViewAdapter)recyclerView.getAdapter();
-        final MutableLiveData<Collection<WifiP2pDevice>> peers = ((MainActivity)getActivity()).getPeers();
+        final MutableLiveData<Collection<WifiP2pDevice>> peers = ((MainActivity) getActivity()).getPeers();
         peers.observe(this, new Observer<Collection<WifiP2pDevice>>() {
             @Override
             public void onChanged(Collection<WifiP2pDevice> s) {
 //                Log.d(TAG,""+s);
                 ArrayList<String> names = new ArrayList<String>();
-                for(WifiP2pDevice device : s){
+                for (WifiP2pDevice device : s) {
                     names.add(device.deviceName);
                 }
-                ((PeersRecyclerViewAdapter)recyclerView.getAdapter()).setDataSet(names);
+                ((PeersRecyclerViewAdapter) recyclerView.getAdapter()).setDataSet(names);
                 peerLst = peers.getValue().toArray(new WifiP2pDevice[peers.getValue().size()]);
 
             }
@@ -72,11 +72,11 @@ public class MainFragment extends Fragment {
                 //GETTING CONNECTION
                 final WifiP2pDevice device = peerLst[position];
 
-                MainActivity activity = (MainActivity)((MainActivity) getActivity());
+                MainActivity activity = (MainActivity) ((MainActivity) getActivity());
 
                 activity.getConnection(device);
 
-                Log.d(TAG, "onClick: "+position);
+                Log.d(TAG, "onClick: " + position);
 
             }
         });
