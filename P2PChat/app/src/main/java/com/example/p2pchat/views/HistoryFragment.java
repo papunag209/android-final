@@ -1,16 +1,19 @@
 package com.example.p2pchat.views;
 
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +22,7 @@ import android.widget.Button;
 import com.example.p2pchat.App;
 import com.example.p2pchat.R;
 import com.example.p2pchat.adapters.HistoryRecyclerViewAdapter;
+import com.example.p2pchat.adapters.OnItemAction;
 import com.example.p2pchat.data.model.Session;
 import com.example.p2pchat.viewModels.HistoryFragmentViewModel;
 
@@ -28,7 +32,8 @@ import java.util.List;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class HistoryFragment extends Fragment {
+public class HistoryFragment extends Fragment implements OnItemAction <Session>{
+    private static final String TAG = "HistoryFragment";
     RecyclerView recyclerView;
     Button clearHistoryButton;
     HistoryRecyclerViewAdapter historyRecyclerViewAdapter;
@@ -79,9 +84,41 @@ public class HistoryFragment extends Fragment {
     }
 
     private void initRecyclerView(){
-        historyRecyclerViewAdapter = new HistoryRecyclerViewAdapter(historyFragmentViewModel.getSessionsListLiveData().getValue());
+        historyRecyclerViewAdapter = new HistoryRecyclerViewAdapter(historyFragmentViewModel.getSessionsListLiveData().getValue(), this);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(App.getContext());
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(historyRecyclerViewAdapter);
+    }
+
+    @Override
+    public void onLongPress(final Session item) {
+        popUpDialogue("Yes",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Log.d(TAG, "onClick: yes" + i);
+                        historyFragmentViewModel.deleteSingle(item);
+                    }
+                },
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        Log.d(TAG, "onClick: nop" + i);
+                    }
+                });
+    }
+
+    public AlertDialog popUpDialogue(String positiveLabel,
+                                     DialogInterface.OnClickListener positiveOnClick,
+                                     DialogInterface.OnClickListener negativeOnClick) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setCancelable(true);
+        builder.setMessage("Do you really want to Delete this session from history");
+        builder.setPositiveButton(positiveLabel, positiveOnClick);
+        builder.setNegativeButton("Cancel", negativeOnClick);
+
+        AlertDialog alert = builder.create();
+        alert.show();
+        return alert;
     }
 }

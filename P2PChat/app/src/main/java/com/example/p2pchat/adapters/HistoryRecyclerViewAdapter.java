@@ -1,8 +1,10 @@
 package com.example.p2pchat.adapters;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -14,18 +16,20 @@ import com.example.p2pchat.data.model.Session;
 import java.util.List;
 
 
-public class HistoryRecyclerViewAdapter extends RecyclerView.Adapter<HistoryRecyclerViewAdapter.ViewHolder> {
+public class HistoryRecyclerViewAdapter extends RecyclerView.Adapter<HistoryRecyclerViewAdapter.ViewHolder> implements OnRecycleItem{
     List<Session> sessions;
+    OnItemAction<Session> onItemAction;
 
-    public HistoryRecyclerViewAdapter(List<Session> sessions) {
+    public HistoryRecyclerViewAdapter(List<Session> sessions, OnItemAction<Session> onItemAction) {
         this.sessions = sessions;
+        this.onItemAction = onItemAction;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.history_recycler_item, parent, false);
-        ViewHolder holder = new ViewHolder(view);
+        ViewHolder holder = new ViewHolder(view, this);
         return holder;
     }
 
@@ -47,15 +51,35 @@ public class HistoryRecyclerViewAdapter extends RecyclerView.Adapter<HistoryRecy
         notifyDataSetChanged();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    @Override
+    public void onLongPress(int position) {
+        onItemAction.onLongPress(sessions.get(position));
+    }
+
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener {
+        private static final String TAG = "ViewHolder";
         TextView phoneName;
         TextView sessionStartDate;
         TextView chatMessagesCount;
-        public ViewHolder(@NonNull View itemView) {
+        OnRecycleItem onRecycleItem;
+        public ViewHolder(@NonNull View itemView, OnRecycleItem onRecycleItem) {
             super(itemView);
             this.phoneName = itemView.findViewById(R.id.textView_phoneName);
             this.sessionStartDate = itemView.findViewById(R.id.textView_sessionStartDate);
             this.chatMessagesCount = itemView.findViewById(R.id.textView_chatMessagesCount);
+            this.onRecycleItem = onRecycleItem;
+            itemView.setOnLongClickListener(this);
+        }
+        @Override
+        public boolean onLongClick(View view) {
+            Log.d(TAG, "onLongClick: inside the adapter pos: " + getAdapterPosition());
+            onRecycleItem.onLongPress(getAdapterPosition());
+            return false;
         }
     }
+
+}
+
+interface OnRecycleItem{
+    void onLongPress(int position);
 }
