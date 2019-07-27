@@ -34,6 +34,9 @@ public interface DataDao {
     @Query("delete from Session")
     void clearSessions();
 
+    @Delete
+    void deleteSession(Session session);
+
     //Message methods
     @Query("select * from Message where SessionId = :sessionId")
     LiveData<List<Message>> getMessages(Long sessionId);
