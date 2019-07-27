@@ -7,18 +7,26 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.net.InetAddresses;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
+import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
+import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 
 import com.example.p2pchat.adapters.PeersRecyclerViewAdapter;
 import com.example.p2pchat.receivers.WifiBroadcastReceiver;
+import com.example.p2pchat.threads.ClientSideThread;
+import com.example.p2pchat.threads.SendAndReceive;
+import com.example.p2pchat.threads.ServerSideThread;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
+import android.os.Handler;
+import android.os.Message;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
@@ -50,6 +58,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import java.lang.reflect.Array;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -62,6 +71,10 @@ public class MainActivity extends AppCompatActivity
     WifiP2pManager.Channel wChannel;
     BroadcastReceiver wReceiver;
     IntentFilter wFilter = new IntentFilter();
+    ClientSideThread client;
+    SendAndReceive sendAndReceive;
+    ServerSideThread server;
+
 
     String[] appPerms = {Manifest.permission.INTERNET, Manifest.permission.ACCESS_WIFI_STATE,
             Manifest.permission.CHANGE_NETWORK_STATE, Manifest.permission.ACCESS_NETWORK_STATE,
@@ -77,13 +90,14 @@ public class MainActivity extends AppCompatActivity
             //TODO DISPLAY DATA WITH ADAPTER
 //                    PeersRecyclerViewAdapter adapter = new PeersRecyclerViewAdapter(peerNames);
         }
-    };;
+    };
+    ;
 
     MutableLiveData<Collection<WifiP2pDevice>> peers = new MutableLiveData<>();
 
     private static final int PERMISSION_REQ_CODE = 1;
 
-    public MutableLiveData<Collection<WifiP2pDevice>> getPeers(){
+    public MutableLiveData<Collection<WifiP2pDevice>> getPeers() {
         return this.peers;
     }
 
@@ -99,14 +113,72 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        registerReceiver(wReceiver, wFilter);
+        if (wReceiver != null) {
+            registerReceiver(wReceiver, wFilter);
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver(wReceiver);
+        if (wReceiver != null) {
+            unregisterReceiver(wReceiver);
+        }
     }
+
+    WifiP2pManager.ConnectionInfoListener connectionInfoListener = new WifiP2pManager.ConnectionInfoListener() {
+        @Override
+        public void onConnectionInfoAvailable(WifiP2pInfo wifiP2pInfo) {
+            InetAddress groupOwnerAddress = wifiP2pInfo.groupOwnerAddress;
+            if (wifiP2pInfo.groupFormed && wifiP2pInfo.isGroupOwner) {
+                Log.d(TAG, "onConnectionInfoAvailable: YOU ARE THE HOST");
+                Toast.makeText(MainActivity.this, "YOU ARE THE HOST", Toast.LENGTH_SHORT).show();
+                server = new ServerSideThread(sendAndReceive, handler);
+                server.start();
+            } else {
+                Log.d(TAG, "onConnectionInfoAvailable: YOU ARE THE CLIENT");
+                Toast.makeText(MainActivity.this, "YOU ARE THE CLIENT", Toast.LENGTH_SHORT).show();
+                client = new ClientSideThread(groupOwnerAddress, sendAndReceive, handler);
+                client.start();
+            }
+        }
+    };
+
+    public void getConnection(final WifiP2pDevice device) {
+        WifiP2pConfig config = new WifiP2pConfig();
+        config.deviceAddress = device.deviceAddress;
+        Log.d(TAG, "getConnection: Will try to connect to" + device.deviceName);
+        wManager.connect(wChannel, config, new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+                Log.d(TAG, "Connected to device: " + device.deviceName);
+            }
+
+            @Override
+            public void onFailure(int i) {
+                Log.d(TAG, "Failed to connect to device: " + device.deviceName);
+            }
+        });
+    }
+
+    public static final int MESSAGE_READ = 5;
+
+    Handler handler = new Handler(new Handler.Callback() {
+        @Override
+        public boolean handleMessage(@NonNull Message message) {
+            switch (message.what) {
+                case MESSAGE_READ:
+                    byte[] readBuff = (byte[]) message.obj;
+                    String tempMsg = new String(readBuff, 0, message.arg1);
+                    //TODO MESSAGE ARRIVED
+                    Toast.makeText(MainActivity.this, "Message read: " + tempMsg, Toast.LENGTH_SHORT).show();
+                    break;
+
+            }
+            return true;
+        }
+    });
+
 
     private void startApp() {
 //        WifiManager wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
@@ -115,16 +187,12 @@ public class MainActivity extends AppCompatActivity
 
         wManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         wChannel = wManager.initialize(this, getMainLooper(), null);
-        wReceiver = new WifiBroadcastReceiver(wChannel, wManager, peerListListener);
+        wReceiver = new WifiBroadcastReceiver(wChannel, wManager, peerListListener, connectionInfoListener);
 
         wFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
         wFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
         wFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         wFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
-
-
-
-
 
 
         Toolbar toolbar = findViewById(R.id.toolbar);
@@ -155,12 +223,12 @@ public class MainActivity extends AppCompatActivity
         wManager.discoverPeers(wChannel, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
-                Toast.makeText(MainActivity.this,"Started Discovery",Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Started Discovery", Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onFailure(int i) {
-                Toast.makeText(MainActivity.this,"Ended Discovery " + i,Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "Ended Discovery " + i, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -290,7 +358,7 @@ public class MainActivity extends AppCompatActivity
             navController.navigate(R.id.mainFragment);
         } else if (id == R.id.nav_history) {
             navController.navigate(R.id.historyFragment);
-        } else if (id == R.id.nav_debug){
+        } else if (id == R.id.nav_debug) {
             navController.navigate(R.id.dummyFragment);
         }
 

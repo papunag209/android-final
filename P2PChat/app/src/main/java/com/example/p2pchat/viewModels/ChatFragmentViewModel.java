@@ -20,14 +20,14 @@ public class ChatFragmentViewModel extends ViewModel {
     LiveData<Session> sessionLiveData;
     Long sessionId;
 
-    public void init(Long sessionId){
+    public void init(Long sessionId) {
         this.sessionId = sessionId;
         dao = Database.getInstance().dataDao();
         sessionLiveData = dao.getSessionById(sessionId);
         messagesListLiveData = dao.getMessages(sessionId);
     }
 
-    public LiveData<List<Message>> getMessages(){
+    public LiveData<List<Message>> getMessages() {
         return messagesListLiveData;
     }
 
@@ -35,7 +35,7 @@ public class ChatFragmentViewModel extends ViewModel {
         return sessionLiveData;
     }
 
-    public void sendMessage(String m){
+    public void sendMessage(String m) {
         Message messageToSend = new Message();
         messageToSend.setMessageText(m);
         messageToSend.setMessageTime(Calendar.getInstance().getTime().toString());

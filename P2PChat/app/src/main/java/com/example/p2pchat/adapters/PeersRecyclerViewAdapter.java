@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class PeersRecyclerViewAdapter extends RecyclerView.Adapter<PeersRecyclerViewAdapter.ViewHolder>{
+public class PeersRecyclerViewAdapter extends RecyclerView.Adapter<PeersRecyclerViewAdapter.ViewHolder> {
     private static final String TAG = "PeersRecyclerViewAdapter";
     List<String> peers;
     OnRecycleItem onRecycleItem;
@@ -37,7 +37,7 @@ public class PeersRecyclerViewAdapter extends RecyclerView.Adapter<PeersRecycler
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.chat_peer_recycler_item, parent, false);
-        ViewHolder holder = new ViewHolder(view,this.onRecycleItem);
+        ViewHolder holder = new ViewHolder(view, this.onRecycleItem);
         return holder;
     }
 
@@ -52,14 +52,15 @@ public class PeersRecyclerViewAdapter extends RecyclerView.Adapter<PeersRecycler
         return peers.size();
     }
 
-    public void setDataSet(List<String> s){
+    public void setDataSet(List<String> s) {
         peers = s;
         notifyDataSetChanged();
     }
 
-    class ViewHolder extends  RecyclerView.ViewHolder{
+    class ViewHolder extends RecyclerView.ViewHolder {
         TextView textView;
         OnRecycleItem onRecycleItem;
+
         public ViewHolder(@NonNull View itemView, final OnRecycleItem onRecycleItem) {
             super(itemView);
             textView = itemView.findViewById(R.id.textView_peerName);
@@ -73,7 +74,7 @@ public class PeersRecyclerViewAdapter extends RecyclerView.Adapter<PeersRecycler
         }
     }
 
-    public interface OnRecycleItem{
+    public interface OnRecycleItem {
         void onClick(int position);
     }
 }
