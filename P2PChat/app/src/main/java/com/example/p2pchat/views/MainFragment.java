@@ -1,6 +1,7 @@
 package com.example.p2pchat.views;
 
 import android.content.Context;
+import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.os.Bundle;
 
@@ -31,7 +32,7 @@ public class MainFragment extends Fragment {
     private static final String TAG = "MainFragment";
     RecyclerView recyclerView;
     PeersRecyclerViewAdapter recyclerViewAdapter;
-
+    WifiP2pDevice[] peerLst;
 
     public MainFragment() {
         // Required empty public constructor
@@ -54,12 +55,13 @@ public class MainFragment extends Fragment {
         peers.observe(this, new Observer<Collection<WifiP2pDevice>>() {
             @Override
             public void onChanged(Collection<WifiP2pDevice> s) {
-                Log.d(TAG,""+s);
+//                Log.d(TAG,""+s);
                 ArrayList<String> names = new ArrayList<String>();
                 for(WifiP2pDevice device : s){
                     names.add(device.deviceName);
                 }
                 ((PeersRecyclerViewAdapter)recyclerView.getAdapter()).setDataSet(names);
+                peerLst = peers.getValue().toArray(new WifiP2pDevice[peers.getValue().size()]);
 
             }
         });
@@ -67,7 +69,13 @@ public class MainFragment extends Fragment {
         PeersRecyclerViewAdapter adapter = new PeersRecyclerViewAdapter(null, new PeersRecyclerViewAdapter.OnRecycleItem() {
             @Override
             public void onClick(int position) {
-//                final WifiP2pDevice device = ;
+                //GETTING CONNECTION
+                final WifiP2pDevice device = peerLst[position];
+
+                MainActivity activity = (MainActivity)((MainActivity) getActivity());
+
+                activity.getConnection(device);
+
                 Log.d(TAG, "onClick: "+position);
 
             }
