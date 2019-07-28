@@ -10,6 +10,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -87,6 +89,12 @@ public class HistoryFragment extends Fragment implements OnItemAction <Session>{
     private void initRecyclerView(){
         historyRecyclerViewAdapter = new HistoryRecyclerViewAdapter(historyFragmentViewModel.getSessionsListLiveData().getValue(), this);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(App.getContext());
+
+        //decorate dividers
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(),
+                ((LinearLayoutManager) layoutManager).getOrientation());
+        recyclerView.addItemDecoration(dividerItemDecoration);
+
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(historyRecyclerViewAdapter);
     }
@@ -107,6 +115,14 @@ public class HistoryFragment extends Fragment implements OnItemAction <Session>{
                         Log.d(TAG, "onClick: nop" + i);
                     }
                 });
+    }
+
+    @Override
+    public void onClick(Session item) {
+        Bundle args = new Bundle();
+        args.putLong("SessionId", item.getSessionId());
+        args.putBoolean("HistoryMode", true);
+        Navigation.findNavController(this.getView()).navigate(R.id.chatFragment, args);
     }
 
     public AlertDialog popUpDialogue(String positiveLabel,

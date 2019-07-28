@@ -57,7 +57,12 @@ public class HistoryRecyclerViewAdapter extends RecyclerView.Adapter<HistoryRecy
         onItemAction.onLongPress(sessions.get(position));
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener {
+    @Override
+    public void onClick(int position) {
+        onItemAction.onClick(sessions.get(position));
+    }
+
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnLongClickListener, View.OnClickListener {
         private static final String TAG = "ViewHolder";
         TextView phoneName;
         TextView sessionStartDate;
@@ -70,6 +75,7 @@ public class HistoryRecyclerViewAdapter extends RecyclerView.Adapter<HistoryRecy
             this.chatMessagesCount = itemView.findViewById(R.id.textView_chatMessagesCount);
             this.onRecycleItem = onRecycleItem;
             itemView.setOnLongClickListener(this);
+            itemView.setOnClickListener(this);
         }
         @Override
         public boolean onLongClick(View view) {
@@ -77,10 +83,16 @@ public class HistoryRecyclerViewAdapter extends RecyclerView.Adapter<HistoryRecy
             onRecycleItem.onLongPress(getAdapterPosition());
             return false;
         }
+
+        @Override
+        public void onClick(View view) {
+            onRecycleItem.onClick(getAdapterPosition());
+        }
     }
 
 }
 
 interface OnRecycleItem{
     void onLongPress(int position);
+    void onClick(int position);
 }

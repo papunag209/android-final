@@ -13,6 +13,10 @@ import com.example.p2pchat.data.model.Session;
 import java.util.Calendar;
 import java.util.List;
 
+import io.reactivex.Completable;
+import io.reactivex.CompletableObserver;
+import io.reactivex.disposables.Disposable;
+
 public class ChatFragmentViewModel extends ViewModel {
     private static final String TAG = "ChatFragmentViewModel";
     DataDao dao;
@@ -47,7 +51,22 @@ public class ChatFragmentViewModel extends ViewModel {
         messageToSend.setSessionId(sessionId);
 //        Log.d(TAG, "sendMessage: session data: " + sessionLiveData.getValue());
 //        Log.d(TAG, "sendMessage: message data:" + messagesListLiveData.getValue());
+        Completable insertDone =  dao.insertMessageAsync(messageToSend);
+        insertDone.subscribe(new CompletableObserver() {
+            @Override
+            public void onSubscribe(Disposable d) {
+                Log.d(TAG, "onSubscribe: ");
+            }
 
-        dao.insertMessage(messageToSend);
+            @Override
+            public void onComplete() {
+                Log.d(TAG, "onComplete: inserted successfully");
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Log.e(TAG, "onError: message insert not inserted successfully!", e);
+            }
+        });
     }
 }

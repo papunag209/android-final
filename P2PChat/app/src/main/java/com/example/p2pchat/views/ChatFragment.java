@@ -52,15 +52,22 @@ public class ChatFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_chat, container, false);
+        View view;
+        view = inflater.inflate(R.layout.fragment_chat, container, false);
+        recyclerView = view.findViewById(R.id.recyclerView_chatMessages);
+        sendButton = view.findViewById(R.id.button_messageSend);
+        messageText = view.findViewById(R.id.editText_messageInput);
+        Boolean isHistoryMode = getArguments().getBoolean("HistoryMode");
+        if(isHistoryMode){
+            messageText.setVisibility(View.GONE);
+            sendButton.setVisibility(View.GONE);
+        }
+        return view;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        recyclerView = view.findViewById(R.id.recyclerView_chatMessages);
-        sendButton = view.findViewById(R.id.button_messageSend);
-        messageText = view.findViewById(R.id.editText_messageInput);
 
         chatFragmentViewModel = ViewModelProviders.of(this).get(ChatFragmentViewModel.class);
 
@@ -80,6 +87,15 @@ public class ChatFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 chatFragmentViewModel.sendMessage(messageText.getText().toString());
+//                long start = System.currentTimeMillis(); todo: clear this for stress testing of async calls
+//                for (int i=0; i<10000; i++){
+//                    chatFragmentViewModel.sendMessage(messageText.getText().toString());
+//                }
+//                long end = System.currentTimeMillis();
+//                Log.d(TAG, "onClick: 10000 items to send in: " + (end-start) + "ms");
+
+                chatFragmentViewModel.sendMessage(messageText.getText().toString());
+                messageText.setText("");
             }
         });
     }

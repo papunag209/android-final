@@ -28,5 +28,9 @@
         <argument
             android:name="SessionId"
             app:argType="long" />
+        <argument
+            android:name="HistoryMode"
+            app:argType="boolean"
+            android:defaultValue="false" />
     </fragment>
 </navigation>

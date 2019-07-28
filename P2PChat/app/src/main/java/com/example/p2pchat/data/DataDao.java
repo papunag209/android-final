@@ -14,6 +14,8 @@ import com.example.p2pchat.data.model.helperModel.SessionWithMessageCount;
 
 import java.util.List;
 
+import io.reactivex.Completable;
+
 @Dao
 public interface DataDao {
     //Session methods
@@ -59,5 +61,7 @@ public interface DataDao {
     @Query("delete from Message")
     void clearMessages();
 
+    @Insert
+    Completable insertMessageAsync(Message message);
 
 }
