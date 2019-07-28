@@ -86,7 +86,7 @@ public class ChatFragment extends Fragment {
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                chatFragmentViewModel.sendMessage(messageText.getText().toString());
+//                chatFragmentViewModel.sendMessage(messageText.getText().toString());
 //                long start = System.currentTimeMillis(); todo: clear this for stress testing of async calls
 //                for (int i=0; i<10000; i++){
 //                    chatFragmentViewModel.sendMessage(messageText.getText().toString());
