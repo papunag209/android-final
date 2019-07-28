@@ -5,6 +5,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -21,8 +22,10 @@ import android.widget.EditText;
 import com.example.p2pchat.App;
 import com.example.p2pchat.R;
 import com.example.p2pchat.adapters.MessagesRecyclerViewAdapter;
+import com.example.p2pchat.data.Database;
 import com.example.p2pchat.data.model.Message;
 import com.example.p2pchat.data.model.Session;
+import com.example.p2pchat.data.model.helperModel.SessionWithMessageCount;
 import com.example.p2pchat.viewModels.ChatFragmentViewModel;
 
 import java.util.List;
@@ -93,6 +96,14 @@ public class ChatFragment extends Fragment {
             @Override
             public void onChanged(Session session) {
                 Log.d(TAG, "onChanged: session changed to: " + session);
+            }
+        });
+        LiveData<SessionWithMessageCount> s;
+        s = Database.getInstance().dataDao().getSessionWithMessageCount(chatFragmentViewModel.getSessionId());
+        s.observe(this, new Observer<SessionWithMessageCount>() {
+            @Override
+            public void onChanged(SessionWithMessageCount sessionWithMessageCount) {
+                Log.d(TAG, "onChanged: session with message count: " + sessionWithMessageCount);
             }
         });
     }

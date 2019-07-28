@@ -6,19 +6,20 @@ import androidx.lifecycle.ViewModel;
 import com.example.p2pchat.data.DataDao;
 import com.example.p2pchat.data.Database;
 import com.example.p2pchat.data.model.Session;
+import com.example.p2pchat.data.model.helperModel.SessionWithMessageCount;
 
 import java.util.List;
 
 public class HistoryFragmentViewModel extends ViewModel {
-    private LiveData<List<Session>> sessionsListLiveData;
+    private LiveData<List<SessionWithMessageCount>> sessionsListLiveData;
     private DataDao dao;
 
     public void init(){
         dao = Database.getInstance().dataDao();
-        this.sessionsListLiveData = dao.getSessions();
+        this.sessionsListLiveData = dao.getSessionListWithMessageCount();
     }
 
-    public LiveData<List<Session>> getSessionsListLiveData() {
+    public LiveData<List<SessionWithMessageCount>> getSessionsListLiveData() {
         return sessionsListLiveData;
     }
 

@@ -24,6 +24,7 @@ import com.example.p2pchat.R;
 import com.example.p2pchat.adapters.HistoryRecyclerViewAdapter;
 import com.example.p2pchat.adapters.OnItemAction;
 import com.example.p2pchat.data.model.Session;
+import com.example.p2pchat.data.model.helperModel.SessionWithMessageCount;
 import com.example.p2pchat.viewModels.HistoryFragmentViewModel;
 
 import java.util.List;
@@ -75,10 +76,10 @@ public class HistoryFragment extends Fragment implements OnItemAction <Session>{
     }
 
     private void initObservers() {
-        historyFragmentViewModel.getSessionsListLiveData().observe(this, new Observer<List<Session>>() {
+        historyFragmentViewModel.getSessionsListLiveData().observe(this, new Observer<List<SessionWithMessageCount>>() {
             @Override
-            public void onChanged(List<Session> sessions) {
-                historyRecyclerViewAdapter.updateDataSet(sessions);
+            public void onChanged(List<SessionWithMessageCount> sessionWithMessageCounts) {
+                historyRecyclerViewAdapter.updateDataSet(sessionWithMessageCounts);
             }
         });
     }

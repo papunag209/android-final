@@ -10,6 +10,7 @@ import androidx.room.Update;
 
 import com.example.p2pchat.data.model.Message;
 import com.example.p2pchat.data.model.Session;
+import com.example.p2pchat.data.model.helperModel.SessionWithMessageCount;
 
 import java.util.List;
 
@@ -36,6 +37,14 @@ public interface DataDao {
 
     @Delete
     void deleteSession(Session session);
+
+    //get session with message count
+    @Query("select *, count(*) as messageCount from session s, message m where s.SessionId = :sessionId and s.SessionId = m.SessionId group by m.SessionId")
+    LiveData<SessionWithMessageCount> getSessionWithMessageCount(Long sessionId);
+
+    @Query("select *, count(*) as messageCount from session s, message m where s.SessionId = m.SessionId group by m.SessionId")
+    LiveData<List<SessionWithMessageCount>> getSessionListWithMessageCount();
+
 
     //Message methods
     @Query("select * from Message where SessionId = :sessionId")

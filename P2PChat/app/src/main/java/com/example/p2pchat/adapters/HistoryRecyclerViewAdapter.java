@@ -12,15 +12,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.p2pchat.R;
 import com.example.p2pchat.data.model.Session;
+import com.example.p2pchat.data.model.helperModel.SessionWithMessageCount;
 
 import java.util.List;
 
 
 public class HistoryRecyclerViewAdapter extends RecyclerView.Adapter<HistoryRecyclerViewAdapter.ViewHolder> implements OnRecycleItem{
-    List<Session> sessions;
+    List<SessionWithMessageCount> sessions;
     OnItemAction<Session> onItemAction;
 
-    public HistoryRecyclerViewAdapter(List<Session> sessions, OnItemAction<Session> onItemAction) {
+    public HistoryRecyclerViewAdapter(List<SessionWithMessageCount> sessions, OnItemAction<Session> onItemAction) {
         this.sessions = sessions;
         this.onItemAction = onItemAction;
     }
@@ -35,7 +36,7 @@ public class HistoryRecyclerViewAdapter extends RecyclerView.Adapter<HistoryRecy
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.chatMessagesCount.setText("133");
+        holder.chatMessagesCount.setText(""+sessions.get(position).getMessageCount());
         holder.phoneName.setText(sessions.get(position).getPeerPhoneName());
         holder.sessionStartDate.setText(sessions.get(position).getSessionStartTime());
     }
@@ -46,7 +47,7 @@ public class HistoryRecyclerViewAdapter extends RecyclerView.Adapter<HistoryRecy
         return sessions.size();
     }
 
-    public void updateDataSet(List<Session> sessions){
+    public void updateDataSet(List<SessionWithMessageCount> sessions){
         this.sessions = sessions;
         notifyDataSetChanged();
     }
