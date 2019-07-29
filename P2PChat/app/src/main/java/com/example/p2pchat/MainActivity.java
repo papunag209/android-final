@@ -84,6 +84,15 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onPeersAvailable(WifiP2pDeviceList wifiP2pDeviceList) {
 
+            /*
+                status list:
+                public static final int AVAILABLE = 3;
+                public static final int CONNECTED = 0;
+                public static final int FAILED = 2;
+                public static final int INVITED = 1;
+                public static final int UNAVAILABLE = 4;
+             */
+
             Log.d(TAG, "onPeersAvailable: " + wifiP2pDeviceList.getDeviceList());
             peers.postValue(wifiP2pDeviceList.getDeviceList());
 
