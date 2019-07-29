@@ -35,6 +35,7 @@ public class WifiBroadcastReceiver extends BroadcastReceiver {
 
         if (msg.equals(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION)) {
             Log.d(TAG, "onReceive: ");
+
         } else if (msg.equals(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION)) {
 
             NetworkInfo nInfo = intent.getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);

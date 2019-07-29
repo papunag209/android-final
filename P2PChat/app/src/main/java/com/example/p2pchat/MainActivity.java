@@ -153,6 +153,10 @@ public class MainActivity extends AppCompatActivity
         }
     };
 
+    public SendAndReceive getSendAndReceive(){
+        return this.sendAndReceive;
+    }
+
     public void getConnection(final WifiP2pDevice device) {
         WifiP2pConfig config = new WifiP2pConfig();
         config.deviceAddress = device.deviceAddress;

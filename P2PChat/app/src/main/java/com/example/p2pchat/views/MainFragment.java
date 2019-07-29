@@ -17,11 +17,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.example.p2pchat.App;
 import com.example.p2pchat.MainActivity;
 import com.example.p2pchat.R;
 import com.example.p2pchat.adapters.PeersRecyclerViewAdapter;
+import com.example.p2pchat.threads.SendAndReceive;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,6 +35,8 @@ public class MainFragment extends Fragment {
     RecyclerView recyclerView;
     PeersRecyclerViewAdapter recyclerViewAdapter;
     WifiP2pDevice[] peerLst;
+    Button btn;
+    SendAndReceive sendAndReceive;
 
     public MainFragment() {
         // Required empty public constructor
@@ -43,13 +47,26 @@ public class MainFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_main, container, false);
+        View view;
+        view = inflater.inflate(R.layout.fragment_main, container, false);
+        recyclerView = view.findViewById(R.id.recyclerView_chatPeers);
+        btn = view.findViewById(R.id.button4_sendMessage);
+        this.sendAndReceive = ((MainActivity)getActivity()).getSendAndReceive();
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+//                if(sendAndReceive != null) {
+//                    Log.d(TAG, "onClick: SENDING MESSAGE");
+//                    sendAndReceive.write("HELLO".getBytes());
+//                }
+            }
+        });
+        return view;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        recyclerView = view.findViewById(R.id.recyclerView_chatPeers);
 //        recyclerViewAdapter = (PeersRecyclerViewAdapter)recyclerView.getAdapter();
         final MutableLiveData<Collection<WifiP2pDevice>> peers = ((MainActivity) getActivity()).getPeers();
         peers.observe(this, new Observer<Collection<WifiP2pDevice>>() {
