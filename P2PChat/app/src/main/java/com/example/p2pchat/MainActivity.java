@@ -96,6 +96,7 @@ public class MainActivity extends AppCompatActivity
             Log.d(TAG, "onPeersAvailable: " + wifiP2pDeviceList.getDeviceList());
             peers.postValue(wifiP2pDeviceList.getDeviceList());
 
+
             //TODO DISPLAY DATA WITH ADAPTER
 //                    PeersRecyclerViewAdapter adapter = new PeersRecyclerViewAdapter(peerNames);
         }
@@ -122,9 +123,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        if (wReceiver != null) {
-            registerReceiver(wReceiver, wFilter);
-        }
+        wReceiver = new WifiBroadcastReceiver(wChannel, wManager, peerListListener, connectionInfoListener);
+        registerReceiver(wReceiver, wFilter);
     }
 
     @Override
@@ -154,7 +154,12 @@ public class MainActivity extends AppCompatActivity
     };
 
     public SendAndReceive getSendAndReceive(){
-        return this.sendAndReceive;
+        if(this.server != null && this.server.getSendAndReceive() != null){
+            return this.server.getSendAndReceive();
+        }else if(this.client != null && this.client.getSendAndReceive() != null){
+            return this.client.getSendAndReceive();
+        }
+        return null;
     }
 
     public void getConnection(final WifiP2pDevice device) {
@@ -179,11 +184,16 @@ public class MainActivity extends AppCompatActivity
     Handler handler = new Handler(new Handler.Callback() {
         @Override
         public boolean handleMessage(@NonNull Message message) {
+
+            Log.d(TAG, "MESSAGE CAME IN: "  + message.arg1);
+
+
             switch (message.what) {
                 case MESSAGE_READ:
                     byte[] readBuff = (byte[]) message.obj;
                     String tempMsg = new String(readBuff, 0, message.arg1);
                     //TODO MESSAGE ARRIVED
+
                     Toast.makeText(MainActivity.this, "Message read: " + tempMsg, Toast.LENGTH_SHORT).show();
                     break;
 

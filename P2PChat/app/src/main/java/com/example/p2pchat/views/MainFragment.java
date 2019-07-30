@@ -36,7 +36,6 @@ public class MainFragment extends Fragment {
     PeersRecyclerViewAdapter recyclerViewAdapter;
     WifiP2pDevice[] peerLst;
     Button btn;
-    SendAndReceive sendAndReceive;
 
     public MainFragment() {
         // Required empty public constructor
@@ -51,14 +50,16 @@ public class MainFragment extends Fragment {
         view = inflater.inflate(R.layout.fragment_main, container, false);
         recyclerView = view.findViewById(R.id.recyclerView_chatPeers);
         btn = view.findViewById(R.id.button4_sendMessage);
-        this.sendAndReceive = ((MainActivity)getActivity()).getSendAndReceive();
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                if(sendAndReceive != null) {
-//                    Log.d(TAG, "onClick: SENDING MESSAGE");
-//                    sendAndReceive.write("HELLO".getBytes());
-//                }
+                SendAndReceive sendAndReceive = ((MainActivity)getActivity()).getSendAndReceive();
+                Log.d(TAG, "onclick: sendAndReceive : " + sendAndReceive);
+
+                if(sendAndReceive != null) {
+                    Log.d(TAG, "onClick: SENDING MESSAGE");
+                    sendAndReceive.write("HELLO".getBytes());
+                }
             }
         });
         return view;

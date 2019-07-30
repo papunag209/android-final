@@ -1,16 +1,25 @@
 package com.example.p2pchat.threads;
 
 
+import android.os.AsyncTask;
 import android.os.Handler;
+import android.util.Log;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
 import static com.example.p2pchat.MainActivity.MESSAGE_READ;
 
 public class SendAndReceive extends Thread {
+
+    private static final String TAG = "SendAndReceive";
+
     private final static int SIZE = 1024;
     private Socket socket;
     private OutputStream out;
@@ -29,12 +38,18 @@ public class SendAndReceive extends Thread {
 
     }
 
-    public void write(byte[] bytes){
-        try {
-            out.write(bytes);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+    public void write(final byte[] bytes){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    out.write(bytes);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     @Override
