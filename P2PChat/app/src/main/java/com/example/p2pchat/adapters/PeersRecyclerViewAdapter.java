@@ -66,7 +66,7 @@ public class PeersRecyclerViewAdapter extends RecyclerView.Adapter<PeersRecycler
         public ViewHolder(@NonNull View itemView, final OnRecycleItem onRecycleItem) {
             super(itemView);
             peerNameTextView = itemView.findViewById(R.id.textView_peerName);
-            peerStatusTextView = itemView.findViewById(R.id.textView_peer_status);
+            peerStatusTextView = itemView.findViewById(R.id.textView_peerStatus);
             this.onRecycleItem = onRecycleItem;
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
