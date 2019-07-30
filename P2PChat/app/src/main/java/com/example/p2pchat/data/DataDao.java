@@ -15,6 +15,7 @@ import com.example.p2pchat.data.model.helperModel.SessionWithMessageCount;
 import java.util.List;
 
 import io.reactivex.Completable;
+import io.reactivex.Single;
 
 @Dao
 public interface DataDao {
@@ -30,6 +31,9 @@ public interface DataDao {
 
     @Insert
     Long insertSession(Session session);
+
+    @Insert
+    Single<Long> inserSessionAsync(Session session);
 
     @Update
     void updateSession(Session session);

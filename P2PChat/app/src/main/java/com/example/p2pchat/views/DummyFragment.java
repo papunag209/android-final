@@ -25,6 +25,10 @@ import com.example.p2pchat.data.model.Session;
 import java.util.Calendar;
 import java.util.List;
 
+import io.reactivex.Single;
+import io.reactivex.SingleObserver;
+import io.reactivex.disposables.Disposable;
+
 
 //TODO: remove this class with its xml
 /**
@@ -82,6 +86,26 @@ public class DummyFragment extends Fragment {
         s.setPeerPhoneName("papuna");
         s.setSessionStartTime(Calendar.getInstance().getTime().toString());
         Long sessionId = dao.insertSession(s);
+        s = new Session();
+        s.setPeerPhoneName("Cira");
+        s.setSessionStartTime(Calendar.getInstance().getTime().toString());
+        Single<Long> single = dao.inserSessionAsync(s);
+        single.subscribe(new SingleObserver<Long>() {
+            @Override
+            public void onSubscribe(Disposable d) {
+
+            }
+
+            @Override
+            public void onSuccess(Long aLong) {
+                Log.d(TAG, "onSuccess: SingleObserver return value: " + aLong);
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Log.e(TAG, "onError: ", e);
+            }
+        });
 
         Log.d(TAG, "populateDb: session id: "+ sessionId);
         Log.d(TAG, "populateDb: session id from obj: " + sessionId);
