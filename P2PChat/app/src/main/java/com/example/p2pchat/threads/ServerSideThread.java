@@ -22,6 +22,7 @@ public class ServerSideThread extends Thread {
     Socket socket;
     SendAndReceive sendAndReceive;
     Handler handler;
+    MainActivity activity;
 
     private static final String TAG = "ServerSideThread";
 
@@ -29,8 +30,9 @@ public class ServerSideThread extends Thread {
         return sendAndReceive;
     }
 
-    public ServerSideThread(Handler handler){
+    public ServerSideThread(Handler handler, MainActivity activity){
         this.handler = handler;
+        this.activity = activity;
     }
 
     @Override
@@ -42,7 +44,7 @@ public class ServerSideThread extends Thread {
 
             socket = serverSocket.accept();
             Log.d(TAG, "run: SOCKET IS AFTER ACCEPT: " + socket);
-            this.sendAndReceive = new SendAndReceive(socket,handler);
+            this.sendAndReceive = new SendAndReceive(socket,handler,activity);
             Log.d(TAG, "run: INITIALIZED SEND AND RECEIVE" + sendAndReceive);
             sendAndReceive.start();
             Log.d(TAG, "run: sending msg from server");

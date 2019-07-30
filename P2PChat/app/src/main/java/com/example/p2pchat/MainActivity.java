@@ -140,34 +140,63 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-//        reInitReceiver();
+//        removeConnection();
         registerReceiver(wReceiver, wFilter);
 
     }
 
-    public void reInitReceiver(){
-        wReceiver = new WifiBroadcastReceiver(wChannel, wManager, peerListListener, connectionInfoListener);
-        registerReceiver(wReceiver, wFilter);
+    public void removeConnection() {
+        wManager.removeGroup(wChannel, new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+                if(server != null && server.getServerSocket() != null){
+                    try {
+                        server.getServerSocket().close();
+                        server.getSocket().close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if(client != null && client.getSocket() != null){
+                    try {
+                        client.getSocket().close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                Log.d(TAG, "onSuccess: DETACHED FROM PEER");
+            }
+
+            @Override
+            public void onFailure(int i) {
+                Log.d(TAG, "onFailure: FAILED TO DETACH FROM PEER");
+            }
+        });
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         if (wReceiver != null) {
-            unregisterReceiver(wReceiver);
+            try {
+                unregisterReceiver(wReceiver);
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    public static String getDeviceStatus(int status){
-        if(status == WifiP2pDevice.AVAILABLE){
+    public static String getDeviceStatus(int status) {
+        if (status == WifiP2pDevice.AVAILABLE) {
             return "AVAILABLE";
-        }else if(status == WifiP2pDevice.INVITED){
+        } else if (status == WifiP2pDevice.INVITED) {
             return "INVITED";
-        }else if(status == WifiP2pDevice.FAILED){
+        } else if (status == WifiP2pDevice.FAILED) {
             return "FAILED";
-        }else if(status == WifiP2pDevice.UNAVAILABLE){
+        } else if (status == WifiP2pDevice.UNAVAILABLE) {
             return "UNAVAILABLE";
-        }else if(status == WifiP2pDevice.CONNECTED){
+        } else if (status == WifiP2pDevice.CONNECTED) {
             return "CONNECTED";
         }
         return "UNKNOWN STATUS";
@@ -184,17 +213,17 @@ public class MainActivity extends AppCompatActivity
                 Log.d(TAG, "onConnectionInfoAvailable: YOU ARE THE HOST");
                 Toast.makeText(MainActivity.this, "YOU ARE THE HOST", Toast.LENGTH_SHORT).show();
 
-                server = new ServerSideThread(handler);
+                server = new ServerSideThread(handler, MainActivity.this);
                 Log.d(TAG, "onConnectionInfoAvailable:Server THREAD CREATED!!!");
                 server.start();
                 Log.d(TAG, "onConnectionInfoAvailable:Server THREAD STARTED");
             } else {
                 Log.d(TAG, "onConnectionInfoAvailable: YOU ARE THE CLIENT");
                 Toast.makeText(MainActivity.this, "YOU ARE THE CLIENT", Toast.LENGTH_SHORT).show();
-                if(client != null){
+                if (client != null) {
                     return;
                 }
-                client = new ClientSideThread(groupOwnerAddress, handler);
+                client = new ClientSideThread(groupOwnerAddress, handler, MainActivity.this);
                 Log.d(TAG, "onConnectionInfoAvailable:Client THREAD CREATED!!!");
                 client.start();
                 Log.d(TAG, "onConnectionInfoAvailable:Client THREAD STARTED!!!");
@@ -202,10 +231,10 @@ public class MainActivity extends AppCompatActivity
         }
     };
 
-    public SendAndReceive getSendAndReceive(){
-        if(this.server != null && this.server.getSendAndReceive() != null){
+    public SendAndReceive getSendAndReceive() {
+        if (this.server != null && this.server.getSendAndReceive() != null) {
             return this.server.getSendAndReceive();
-        }else if(this.client != null && this.client.getSendAndReceive() != null){
+        } else if (this.client != null && this.client.getSendAndReceive() != null) {
             return this.client.getSendAndReceive();
         }
         return null;
@@ -234,7 +263,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         public boolean handleMessage(@NonNull Message message) {
 
-            Log.d(TAG, "MESSAGE CAME IN: "  + message.arg1);
+            Log.d(TAG, "MESSAGE CAME IN: " + message.arg1);
 
 
             switch (message.what) {

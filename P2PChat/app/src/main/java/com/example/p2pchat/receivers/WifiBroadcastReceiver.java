@@ -36,6 +36,8 @@ public class WifiBroadcastReceiver extends BroadcastReceiver {
 
         assert msg != null;
 
+        Log.d(TAG, "onReceive: SOMETHING CAME IN!!!");
+        
         if (msg.equals(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION)) {
             Log.d(TAG, "onReceive: ");
 

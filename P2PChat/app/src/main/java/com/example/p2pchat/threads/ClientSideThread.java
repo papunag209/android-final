@@ -3,6 +3,8 @@ package com.example.p2pchat.threads;
 import android.os.Handler;
 import android.util.Log;
 
+import com.example.p2pchat.MainActivity;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -12,9 +14,10 @@ import java.net.Socket;
 public class ClientSideThread extends Thread{
 
     InetAddress address;
-    Socket socket;
+    private Socket socket;
     SendAndReceive sendAndReceive;
     Handler handler;
+    MainActivity activity;
     private static final String TAG = "ClientSideThread";
 
 
@@ -22,10 +25,14 @@ public class ClientSideThread extends Thread{
         return sendAndReceive;
     }
 
-    public ClientSideThread(InetAddress address, Handler handler){
+    public Socket getSocket(){
+        return socket;
+    }
+
+    public ClientSideThread(InetAddress address, Handler handler, MainActivity activity){
         socket = new Socket();
         this.address = address;
-        this.sendAndReceive = sendAndReceive;
+        this.activity = activity;
         this.handler = handler;
     }
 
@@ -33,7 +40,7 @@ public class ClientSideThread extends Thread{
     public void run() {
         try {
             socket.connect(new InetSocketAddress(address.getHostAddress(),8080),1000);
-            sendAndReceive = new SendAndReceive(socket,handler);
+            sendAndReceive = new SendAndReceive(socket,handler,activity);
             Log.d(TAG, "run: INITIALIZED SEND AND RECEIVE" + sendAndReceive);
 
             sendAndReceive.start();

@@ -77,6 +77,7 @@ public class MainFragment extends Fragment {
         peers.observe(this, new Observer<Collection<WifiP2pDevice>>() {
             @Override
             public void onChanged(Collection<WifiP2pDevice> s) {
+                Log.d(TAG, "onChanged: SOMETHING CHANGED!!!");
                 ArrayList<PeerStatusHolder> peerStatuses = new ArrayList<PeerStatusHolder>();
                 for (WifiP2pDevice device : s) {
                     peerStatuses.add(new PeerStatusHolder(device.deviceName,getDeviceStatus(device.status)));
@@ -86,7 +87,7 @@ public class MainFragment extends Fragment {
 //                    }
 //                    MainActivity activity = (MainActivity) getActivity();
 //                    if(isConnected && activity.getClient()== null && activity.getServer() == null){
-//                        activity.reInitReceiver();
+//                        activity.removeConnection();
 //                    }
                 }
                 ((PeersRecyclerViewAdapter) recyclerView.getAdapter()).setDataSet(peerStatuses);
