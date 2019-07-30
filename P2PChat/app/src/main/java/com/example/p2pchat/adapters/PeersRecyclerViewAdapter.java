@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.p2pchat.R;
+import com.example.p2pchat.data.model.dataholder.PeerStatusHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,11 +17,11 @@ import java.util.List;
 
 public class PeersRecyclerViewAdapter extends RecyclerView.Adapter<PeersRecyclerViewAdapter.ViewHolder> {
     private static final String TAG = "PeersRecyclerViewAdapter";
-    List<String> peers;
+    List<PeerStatusHolder> peers;
     OnRecycleItem onRecycleItem;
 
 
-    public PeersRecyclerViewAdapter(ArrayList<String> peers, OnRecycleItem onRecycleItem) {
+    public PeersRecyclerViewAdapter(ArrayList<PeerStatusHolder> peers, OnRecycleItem onRecycleItem) {
         super();
         this.peers = peers;
         this.onRecycleItem = onRecycleItem;
@@ -43,7 +44,8 @@ public class PeersRecyclerViewAdapter extends RecyclerView.Adapter<PeersRecycler
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.textView.setText(peers.get(position));
+        holder.peerNameTextView.setText(peers.get(position).getName());
+        holder.peerStatusTextView.setText(peers.get(position).getStatus());
     }
 
     @Override
@@ -52,18 +54,19 @@ public class PeersRecyclerViewAdapter extends RecyclerView.Adapter<PeersRecycler
         return peers.size();
     }
 
-    public void setDataSet(List<String> s) {
+    public void setDataSet(List<PeerStatusHolder> s) {
         peers = s;
         notifyDataSetChanged();
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
-        TextView textView;
+        TextView peerNameTextView,peerStatusTextView;
         OnRecycleItem onRecycleItem;
 
         public ViewHolder(@NonNull View itemView, final OnRecycleItem onRecycleItem) {
             super(itemView);
-            textView = itemView.findViewById(R.id.textView_peerName);
+            peerNameTextView = itemView.findViewById(R.id.textView_peerName);
+            peerStatusTextView = itemView.findViewById(R.id.textView_peer_status);
             this.onRecycleItem = onRecycleItem;
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

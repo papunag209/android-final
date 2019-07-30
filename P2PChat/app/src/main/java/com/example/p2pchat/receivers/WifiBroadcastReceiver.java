@@ -7,10 +7,13 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkInfo;
+import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.util.Log;
 
 import com.example.p2pchat.MainActivity;
+
+import static com.example.p2pchat.MainActivity.getDeviceStatus;
 
 public class WifiBroadcastReceiver extends BroadcastReceiver {
     private static final String TAG = "WifiBroadcastReceiver";
@@ -53,9 +56,13 @@ public class WifiBroadcastReceiver extends BroadcastReceiver {
                 wManager.requestPeers(wChannel, peerListListener);
             }
         } else if (msg.equals(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION)) {
+            WifiP2pDevice device = intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_DEVICE);
+            if(device == null) {
+                Log.d(TAG, "onReceive: Device is null");
+            }else{
+                String status = getDeviceStatus(device.status);
 
+            }
         }
-
-
     }
 }

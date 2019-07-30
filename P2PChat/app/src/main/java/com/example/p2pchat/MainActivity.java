@@ -57,6 +57,7 @@ import android.view.Menu;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.lang.reflect.Array;
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -72,7 +73,23 @@ public class MainActivity extends AppCompatActivity
     BroadcastReceiver wReceiver;
     IntentFilter wFilter = new IntentFilter();
     ClientSideThread client;
-    SendAndReceive sendAndReceive;
+
+    public ClientSideThread getClient() {
+        return client;
+    }
+
+    public void setClient(ClientSideThread client) {
+        this.client = client;
+    }
+
+    public ServerSideThread getServer() {
+        return server;
+    }
+
+    public void setServer(ServerSideThread server) {
+        this.server = server;
+    }
+
     ServerSideThread server;
 
 
@@ -123,6 +140,12 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+//        reInitReceiver();
+        registerReceiver(wReceiver, wFilter);
+
+    }
+
+    public void reInitReceiver(){
         wReceiver = new WifiBroadcastReceiver(wChannel, wManager, peerListListener, connectionInfoListener);
         registerReceiver(wReceiver, wFilter);
     }
@@ -135,20 +158,46 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    public static String getDeviceStatus(int status){
+        if(status == WifiP2pDevice.AVAILABLE){
+            return "AVAILABLE";
+        }else if(status == WifiP2pDevice.INVITED){
+            return "INVITED";
+        }else if(status == WifiP2pDevice.FAILED){
+            return "FAILED";
+        }else if(status == WifiP2pDevice.UNAVAILABLE){
+            return "UNAVAILABLE";
+        }else if(status == WifiP2pDevice.CONNECTED){
+            return "CONNECTED";
+        }
+        return "UNKNOWN STATUS";
+    }
+
+
     WifiP2pManager.ConnectionInfoListener connectionInfoListener = new WifiP2pManager.ConnectionInfoListener() {
         @Override
         public void onConnectionInfoAvailable(WifiP2pInfo wifiP2pInfo) {
             InetAddress groupOwnerAddress = wifiP2pInfo.groupOwnerAddress;
+            Log.d(TAG, "onConnectionInfoAvailable: TRYING TO REINIT SERVER AND CLIENT");
+
             if (wifiP2pInfo.groupFormed && wifiP2pInfo.isGroupOwner) {
                 Log.d(TAG, "onConnectionInfoAvailable: YOU ARE THE HOST");
                 Toast.makeText(MainActivity.this, "YOU ARE THE HOST", Toast.LENGTH_SHORT).show();
-                server = new ServerSideThread(sendAndReceive, handler);
+
+                server = new ServerSideThread(handler);
+                Log.d(TAG, "onConnectionInfoAvailable:Server THREAD CREATED!!!");
                 server.start();
+                Log.d(TAG, "onConnectionInfoAvailable:Server THREAD STARTED");
             } else {
                 Log.d(TAG, "onConnectionInfoAvailable: YOU ARE THE CLIENT");
                 Toast.makeText(MainActivity.this, "YOU ARE THE CLIENT", Toast.LENGTH_SHORT).show();
-                client = new ClientSideThread(groupOwnerAddress, sendAndReceive, handler);
+                if(client != null){
+                    return;
+                }
+                client = new ClientSideThread(groupOwnerAddress, handler);
+                Log.d(TAG, "onConnectionInfoAvailable:Client THREAD CREATED!!!");
                 client.start();
+                Log.d(TAG, "onConnectionInfoAvailable:Client THREAD STARTED!!!");
             }
         }
     };

@@ -22,7 +22,7 @@ public class ClientSideThread extends Thread{
         return sendAndReceive;
     }
 
-    public ClientSideThread(InetAddress address, SendAndReceive sendAndReceive, Handler handler){
+    public ClientSideThread(InetAddress address, Handler handler){
         socket = new Socket();
         this.address = address;
         this.sendAndReceive = sendAndReceive;

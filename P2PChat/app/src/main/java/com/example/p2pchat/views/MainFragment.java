@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,11 +24,14 @@ import com.example.p2pchat.App;
 import com.example.p2pchat.MainActivity;
 import com.example.p2pchat.R;
 import com.example.p2pchat.adapters.PeersRecyclerViewAdapter;
+import com.example.p2pchat.data.model.dataholder.PeerStatusHolder;
 import com.example.p2pchat.threads.SendAndReceive;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import static com.example.p2pchat.MainActivity.getDeviceStatus;
 
 
 public class MainFragment extends Fragment {
@@ -73,12 +77,19 @@ public class MainFragment extends Fragment {
         peers.observe(this, new Observer<Collection<WifiP2pDevice>>() {
             @Override
             public void onChanged(Collection<WifiP2pDevice> s) {
-//                Log.d(TAG,""+s);
-                ArrayList<String> names = new ArrayList<String>();
+                ArrayList<PeerStatusHolder> peerStatuses = new ArrayList<PeerStatusHolder>();
                 for (WifiP2pDevice device : s) {
-                    names.add(device.deviceName);
+                    peerStatuses.add(new PeerStatusHolder(device.deviceName,getDeviceStatus(device.status)));
+//                    boolean isConnected = false;
+//                    if(device.status == WifiP2pDevice.CONNECTED){
+//                        isConnected = true;
+//                    }
+//                    MainActivity activity = (MainActivity) getActivity();
+//                    if(isConnected && activity.getClient()== null && activity.getServer() == null){
+//                        activity.reInitReceiver();
+//                    }
                 }
-                ((PeersRecyclerViewAdapter) recyclerView.getAdapter()).setDataSet(names);
+                ((PeersRecyclerViewAdapter) recyclerView.getAdapter()).setDataSet(peerStatuses);
                 peerLst = peers.getValue().toArray(new WifiP2pDevice[peers.getValue().size()]);
 
             }
