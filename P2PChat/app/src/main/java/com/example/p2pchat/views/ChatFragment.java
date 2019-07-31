@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
@@ -18,6 +19,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+
+import androidx.appcompat.widget.Toolbar;
 
 import com.example.p2pchat.App;
 import com.example.p2pchat.R;
@@ -37,6 +41,8 @@ public class ChatFragment extends Fragment {
     ChatFragmentViewModel chatFragmentViewModel;
     Button sendButton;
     EditText messageText;
+    ImageButton backButton;
+    ImageButton deleteButton;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -57,6 +63,9 @@ public class ChatFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerView_chatMessages);
         sendButton = view.findViewById(R.id.button_messageSend);
         messageText = view.findViewById(R.id.editText_messageInput);
+        backButton = view.findViewById(R.id.imageButton_chatBack);
+        deleteButton = view.findViewById(R.id.imageButton_deleteThisMessage);
+
         Boolean isHistoryMode = getArguments().getBoolean("HistoryMode");
         if(isHistoryMode){
             messageText.setVisibility(View.GONE);
