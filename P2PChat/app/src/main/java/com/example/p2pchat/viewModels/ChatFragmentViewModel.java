@@ -69,4 +69,8 @@ public class ChatFragmentViewModel extends ViewModel {
             }
         });
     }
+
+    public void deleteThisSession(){
+        dao.deleteSession(sessionLiveData.getValue());
+    }
 }
