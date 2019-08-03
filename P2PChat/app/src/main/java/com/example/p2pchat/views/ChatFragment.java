@@ -73,7 +73,7 @@ public class ChatFragment extends Fragment {
 
 
         Boolean isHistoryMode = getArguments().getBoolean("HistoryMode");
-        if(isHistoryMode){
+        if (isHistoryMode) {
             messageText.setVisibility(View.GONE);
             sendButton.setVisibility(View.GONE);
         }
@@ -88,7 +88,7 @@ public class ChatFragment extends Fragment {
         navController = Navigation.findNavController(this.getView());
 
         Long sessionId = getArguments().getLong("SessionId");
-        if (sessionId == null){
+        if (sessionId == null) {
             Log.d(TAG, "onViewCreated: No Session Given To Fragment");
         } else {
             chatFragmentViewModel.init(sessionId);
@@ -98,7 +98,7 @@ public class ChatFragment extends Fragment {
         }
     }
 
-    private void initOnClickListeners(){
+    private void initOnClickListeners() {
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -120,7 +120,7 @@ public class ChatFragment extends Fragment {
         });
     }
 
-    private void initDataObservers(){
+    private void initDataObservers() {
         chatFragmentViewModel.getMessages().observe(this, new Observer<List<Message>>() {
             @Override
             public void onChanged(List<Message> messages) {
@@ -132,7 +132,7 @@ public class ChatFragment extends Fragment {
             @Override
             public void onChanged(Session session) {
                 Log.d(TAG, "onChanged: session changed to: " + session);
-                if (session == null){
+                if (session == null) {
                     navController.navigateUp();
                 }
             }
@@ -147,7 +147,7 @@ public class ChatFragment extends Fragment {
         });
     }
 
-    private void displayDeletePopup(){
+    private void displayDeletePopup() {
         popUpDialogue("Yes",
                 "Do you want to delete this Chat?",
                 new DialogInterface.OnClickListener() {
@@ -179,7 +179,7 @@ public class ChatFragment extends Fragment {
         return alert;
     }
 
-    private void initRecyclerView(){
+    private void initRecyclerView() {
         recyclerAdapter = new MessagesRecyclerViewAdapter(chatFragmentViewModel.getMessages().getValue());
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(App.getContext());
         recyclerView.setLayoutManager(layoutManager);

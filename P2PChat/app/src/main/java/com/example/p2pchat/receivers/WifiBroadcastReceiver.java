@@ -37,7 +37,7 @@ public class WifiBroadcastReceiver extends BroadcastReceiver {
         assert msg != null;
 
         Log.d(TAG, "onReceive: SOMETHING CAME IN!!!");
-        
+
         if (msg.equals(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION)) {
             Log.d(TAG, "onReceive: ");
 
@@ -45,8 +45,8 @@ public class WifiBroadcastReceiver extends BroadcastReceiver {
 
             NetworkInfo nInfo = intent.getParcelableExtra(WifiP2pManager.EXTRA_NETWORK_INFO);
             if (nInfo.isConnected()) {
-                wManager.requestConnectionInfo(wChannel,this.connectionInfoListener);
-            }else{
+                wManager.requestConnectionInfo(wChannel, this.connectionInfoListener);
+            } else {
                 Log.d(TAG, "onReceive: CONNECTION LOST");
             }
 
@@ -59,9 +59,9 @@ public class WifiBroadcastReceiver extends BroadcastReceiver {
             }
         } else if (msg.equals(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION)) {
             WifiP2pDevice device = intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_DEVICE);
-            if(device == null) {
+            if (device == null) {
                 Log.d(TAG, "onReceive: Device is null");
-            }else{
+            } else {
                 String status = getDeviceStatus(device.status);
 
             }

@@ -14,7 +14,7 @@ public class HistoryFragmentViewModel extends ViewModel {
     private LiveData<List<SessionWithMessageCount>> sessionsListLiveData;
     private DataDao dao;
 
-    public void init(){
+    public void init() {
         dao = Database.getInstance().dataDao();
         this.sessionsListLiveData = dao.getSessionListWithMessageCount();
     }
@@ -23,11 +23,11 @@ public class HistoryFragmentViewModel extends ViewModel {
         return sessionsListLiveData;
     }
 
-    public void deleteAll(){
+    public void deleteAll() {
         dao.clearSessions();
     }
 
-    public void deleteSingle(Session s){
+    public void deleteSingle(Session s) {
         dao.deleteSession(s);
     }
 }

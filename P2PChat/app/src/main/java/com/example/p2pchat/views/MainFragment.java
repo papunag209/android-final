@@ -57,10 +57,10 @@ public class MainFragment extends Fragment {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                SendAndReceive sendAndReceive = ((MainActivity)getActivity()).getSendAndReceive();
+                SendAndReceive sendAndReceive = ((MainActivity) getActivity()).getSendAndReceive();
                 Log.d(TAG, "onclick: sendAndReceive : " + sendAndReceive);
 
-                if(sendAndReceive != null) {
+                if (sendAndReceive != null) {
                     Log.d(TAG, "onClick: SENDING MESSAGE");
                     sendAndReceive.write("HELLO".getBytes());
                 }
@@ -80,7 +80,7 @@ public class MainFragment extends Fragment {
                 Log.d(TAG, "onChanged: SOMETHING CHANGED!!!");
                 ArrayList<PeerStatusHolder> peerStatuses = new ArrayList<PeerStatusHolder>();
                 for (WifiP2pDevice device : s) {
-                    peerStatuses.add(new PeerStatusHolder(device.deviceName,getDeviceStatus(device.status)));
+                    peerStatuses.add(new PeerStatusHolder(device.deviceName, getDeviceStatus(device.status)));
 //                    boolean isConnected = false;
 //                    if(device.status == WifiP2pDevice.CONNECTED){
 //                        isConnected = true;
@@ -102,7 +102,7 @@ public class MainFragment extends Fragment {
                 //GETTING CONNECTION
                 final WifiP2pDevice device = peerLst[position];
 
-                MainActivity activity =(MainActivity) getActivity();
+                MainActivity activity = (MainActivity) getActivity();
 
                 activity.getConnection(device);
 

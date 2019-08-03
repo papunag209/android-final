@@ -51,7 +51,7 @@ public class ChatFragmentViewModel extends ViewModel {
         messageToSend.setSessionId(sessionId);
 //        Log.d(TAG, "sendMessage: session data: " + sessionLiveData.getValue());
 //        Log.d(TAG, "sendMessage: message data:" + messagesListLiveData.getValue());
-        Completable insertDone =  dao.insertMessageAsync(messageToSend);
+        Completable insertDone = dao.insertMessageAsync(messageToSend);
         insertDone.subscribe(new CompletableObserver() {
             @Override
             public void onSubscribe(Disposable d) {
@@ -70,7 +70,7 @@ public class ChatFragmentViewModel extends ViewModel {
         });
     }
 
-    public void deleteThisSession(){
+    public void deleteThisSession() {
         dao.deleteSession(sessionLiveData.getValue());
     }
 }

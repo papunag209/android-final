@@ -23,7 +23,7 @@ public class SendAndReceive extends Thread {
     private Handler handler;
     MainActivity activity;
 
-    public SendAndReceive(Socket socket, Handler handler, MainActivity activity){
+    public SendAndReceive(Socket socket, Handler handler, MainActivity activity) {
         this.socket = socket;
         this.handler = handler;
         this.activity = activity;
@@ -37,7 +37,7 @@ public class SendAndReceive extends Thread {
     }
 
 
-    public void write(final byte[] bytes){
+    public void write(final byte[] bytes) {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -56,11 +56,11 @@ public class SendAndReceive extends Thread {
         byte[] buff = new byte[SIZE];
         int bytes;
 
-        while(socket != null){
+        while (socket != null) {
             try {
                 bytes = in.read(buff);
-                if(bytes > 0){
-                    handler.obtainMessage(MESSAGE_READ,bytes,-1,buff).sendToTarget();
+                if (bytes > 0) {
+                    handler.obtainMessage(MESSAGE_READ, bytes, -1, buff).sendToTarget();
                 }
 
             } catch (IOException e) {

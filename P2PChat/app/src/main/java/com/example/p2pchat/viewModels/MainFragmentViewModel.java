@@ -43,9 +43,9 @@ public class MainFragmentViewModel extends ViewModel {
     }
 
     //should subscribe to returned value and receive session id.
-    public Single<Long> registerSession(){
+    public Single<Long> registerSession(String addr){
         Session s = new Session();
-        s.setPeerPhoneName("papuna");
+        s.setPeerPhoneName(addr);
         s.setSessionStartTime(Calendar.getInstance().getTime().toString());
 
         return dao.inserSessionAsync(s);
