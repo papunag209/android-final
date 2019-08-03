@@ -39,14 +39,16 @@ public class ClientSideThread extends Thread {
     @Override
     public void run() {
         try {
-            socket.connect(new InetSocketAddress(address.getHostAddress(), 8080), 1000);
-            Log.d(TAG, "run:CLIENT SOCKET INITIALIZED");
-            sendAndReceive = new SendAndReceive(socket, handler, activity);
-            Log.d(TAG, "run: INITIALIZED SEND AND RECEIVE" + sendAndReceive);
+            if(address != null && socket != null) {
+                socket.connect(new InetSocketAddress(address.getHostAddress(), 8080), 1000);
+                Log.d(TAG, "run:CLIENT SOCKET INITIALIZED");
+                sendAndReceive = new SendAndReceive(socket, handler, activity);
+                Log.d(TAG, "run: INITIALIZED SEND AND RECEIVE" + sendAndReceive);
 
-            sendAndReceive.start();
-            Log.d(TAG, "run: sending msg from client");
-            sendAndReceive.write("gamadjobaa".getBytes());
+                sendAndReceive.start();
+                Log.d(TAG, "run: sending msg from client");
+                sendAndReceive.write("gamadjobaa".getBytes());
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }

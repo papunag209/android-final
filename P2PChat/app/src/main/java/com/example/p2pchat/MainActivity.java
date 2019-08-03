@@ -153,27 +153,40 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    private void closeSockets(){
+        if (server != null) {
+            if(server.getServerSocket() != null){
+                try {
+                    server.getServerSocket().close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(server.getSocket() != null){
+                try {
+                    server.getSocket().close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+        }
+        if (client != null && client.getSocket() != null) {
+            try {
+                client.getSocket().close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public void removeConnection() {
         if(wManager != null && wChannel != null) {
             wManager.removeGroup(wChannel, new WifiP2pManager.ActionListener() {
                 @Override
                 public void onSuccess() {
-                    if (server != null && server.getServerSocket() != null) {
-                        try {
-                            server.getServerSocket().close();
-                            server.getSocket().close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    if (client != null && client.getSocket() != null) {
-                        try {
-                            client.getSocket().close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-
+                    closeSockets();
                     Log.d(TAG, "onSuccess: DETACHED FROM PEER");
                 }
 
@@ -218,7 +231,7 @@ public class MainActivity extends AppCompatActivity
         public void onConnectionInfoAvailable(WifiP2pInfo wifiP2pInfo) {
             InetAddress groupOwnerAddress = wifiP2pInfo.groupOwnerAddress;
             Log.d(TAG, "onConnectionInfoAvailable: TRYING TO REINIT SERVER AND CLIENT");
-
+            closeSockets();
             if (wifiP2pInfo.groupFormed && wifiP2pInfo.isGroupOwner) {
                 Log.d(TAG, "onConnectionInfoAvailable: YOU ARE THE HOST");
                 Toast.makeText(MainActivity.this, "YOU ARE THE HOST", Toast.LENGTH_SHORT).show();
