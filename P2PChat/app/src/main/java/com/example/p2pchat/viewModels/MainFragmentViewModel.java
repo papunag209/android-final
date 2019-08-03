@@ -17,17 +17,22 @@ import io.reactivex.Completable;
 import io.reactivex.Single;
 
 public class MainFragmentViewModel extends ViewModel {
-    private MutableLiveData<Collection<WifiP2pDevice>> collectionLiveData;
+    private LiveData<Collection<WifiP2pDevice>> collectionLiveData;
     private DataDao dao;
     private MutableLiveData<Boolean> loadingOverlayVisible;
     private String loadingOverlayLabel;
 
-    public MainFragmentViewModel(MutableLiveData<Collection<WifiP2pDevice>> collectionLiveData) {
-        this.collectionLiveData = collectionLiveData;
+    private static final String TAG = "MainFragmentViewModel";
+
+    public MainFragmentViewModel() {
         this.dao = Database.getInstance().dataDao();
         this.loadingOverlayLabel = "";
         this.loadingOverlayVisible = new MutableLiveData<>();
         this.loadingOverlayVisible.setValue(false);
+    }
+
+    public void init(LiveData<Collection<WifiP2pDevice>> collectionLiveData){
+        this.collectionLiveData = collectionLiveData;
     }
 
     public void setLoadingOverlayVisible(Boolean loadingOverlayVisible) {
@@ -43,9 +48,9 @@ public class MainFragmentViewModel extends ViewModel {
     }
 
     //should subscribe to returned value and receive session id.
-    public Single<Long> registerSession(){
+    public Single<Long> registerSession(String addr){
         Session s = new Session();
-        s.setPeerPhoneName("papuna");
+        s.setPeerPhoneName(addr);
         s.setSessionStartTime(Calendar.getInstance().getTime().toString());
 
         return dao.inserSessionAsync(s);

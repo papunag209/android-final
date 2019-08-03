@@ -18,6 +18,7 @@ import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 
 import com.example.p2pchat.adapters.PeersRecyclerViewAdapter;
+import com.example.p2pchat.interfaces.P2pController;
 import com.example.p2pchat.receivers.WifiBroadcastReceiver;
 import com.example.p2pchat.threads.ClientSideThread;
 import com.example.p2pchat.threads.SendAndReceive;
@@ -67,7 +68,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, P2pController {
     private static final String TAG = "MainActivity";
     NavController navController;
     WifiP2pManager wManager;
@@ -75,6 +76,7 @@ public class MainActivity extends AppCompatActivity
     BroadcastReceiver wReceiver;
     IntentFilter wFilter = new IntentFilter();
     ClientSideThread client;
+    MutableLiveData<WifiP2pDevice> connectedDevice = new MutableLiveData<>();
 
     public ClientSideThread getClient() {
         return client;
@@ -121,13 +123,19 @@ public class MainActivity extends AppCompatActivity
         }
     };
     ;
-
+    //TODO place init in oncreate
     MutableLiveData<Collection<WifiP2pDevice>> peers = new MutableLiveData<>();
 
     private static final int PERMISSION_REQ_CODE = 1;
 
-    public MutableLiveData<Collection<WifiP2pDevice>> getPeers() {
+    @Override
+    public LiveData<Collection<WifiP2pDevice>> getPeerLiveData() {
         return this.peers;
+    }
+
+    @Override
+    public LiveData<WifiP2pDevice> getConnectedDevice() {
+        return this.connectedDevice;
     }
 
     @Override
@@ -147,34 +155,49 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    private void closeSockets(){
+        if (server != null) {
+            if(server.getServerSocket() != null){
+                try {
+                    server.getServerSocket().close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(server.getSocket() != null){
+                try {
+                    server.getSocket().close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+        }
+        if (client != null && client.getSocket() != null) {
+            try {
+                client.getSocket().close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public void removeConnection() {
-        wManager.removeGroup(wChannel, new WifiP2pManager.ActionListener() {
-            @Override
-            public void onSuccess() {
-                if(server != null && server.getServerSocket() != null){
-                    try {
-                        server.getServerSocket().close();
-                        server.getSocket().close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                if(client != null && client.getSocket() != null){
-                    try {
-                        client.getSocket().close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+        if(wManager != null && wChannel != null) {
+            wManager.removeGroup(wChannel, new WifiP2pManager.ActionListener() {
+                @Override
+                public void onSuccess() {
+                    closeSockets();
+                    Log.d(TAG, "onSuccess: DETACHED FROM PEER");
                 }
 
-                Log.d(TAG, "onSuccess: DETACHED FROM PEER");
-            }
-
-            @Override
-            public void onFailure(int i) {
-                Log.d(TAG, "onFailure: FAILED TO DETACH FROM PEER");
-            }
-        });
+                @Override
+                public void onFailure(int i) {
+                    Log.d(TAG, "onFailure: FAILED TO DETACH FROM PEER");
+                }
+            });
+        }
     }
 
     @Override
@@ -210,7 +233,7 @@ public class MainActivity extends AppCompatActivity
         public void onConnectionInfoAvailable(WifiP2pInfo wifiP2pInfo) {
             InetAddress groupOwnerAddress = wifiP2pInfo.groupOwnerAddress;
             Log.d(TAG, "onConnectionInfoAvailable: TRYING TO REINIT SERVER AND CLIENT");
-
+            closeSockets();
             if (wifiP2pInfo.groupFormed && wifiP2pInfo.isGroupOwner) {
                 Log.d(TAG, "onConnectionInfoAvailable: YOU ARE THE HOST");
                 Toast.makeText(MainActivity.this, "YOU ARE THE HOST", Toast.LENGTH_SHORT).show();
@@ -222,9 +245,7 @@ public class MainActivity extends AppCompatActivity
             } else {
                 Log.d(TAG, "onConnectionInfoAvailable: YOU ARE THE CLIENT");
                 Toast.makeText(MainActivity.this, "YOU ARE THE CLIENT", Toast.LENGTH_SHORT).show();
-                if (client != null) {
-                    return;
-                }
+
                 client = new ClientSideThread(groupOwnerAddress, handler, MainActivity.this);
                 Log.d(TAG, "onConnectionInfoAvailable:Client THREAD CREATED!!!");
                 client.start();
@@ -242,14 +263,16 @@ public class MainActivity extends AppCompatActivity
         return null;
     }
 
-    public void getConnection(final WifiP2pDevice device) {
+    @Override
+    public void connectToDevice(final WifiP2pDevice device) {
         WifiP2pConfig config = new WifiP2pConfig();
         config.deviceAddress = device.deviceAddress;
-        Log.d(TAG, "getConnection: Will try to connect to" + device.deviceName);
+        Log.d(TAG, "connectToDevice: Will try to connect to" + device.deviceName);
         wManager.connect(wChannel, config, new WifiP2pManager.ActionListener() {
             @Override
             public void onSuccess() {
                 Log.d(TAG, "Connected to device: " + device.deviceName);
+                connectedDevice.postValue(device);
             }
 
             @Override
@@ -287,7 +310,6 @@ public class MainActivity extends AppCompatActivity
 //        WifiManager wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 //        wifiManager.setWifiEnabled(true);
 //        wifiManager.setWifiEnabled(false);
-
         wManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         wChannel = wManager.initialize(this, getMainLooper(), null);
         wReceiver = new WifiBroadcastReceiver(wChannel, wManager, peerListListener, connectionInfoListener);
@@ -296,7 +318,7 @@ public class MainActivity extends AppCompatActivity
         wFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
         wFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         wFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
-
+        removeConnection();
 
         final Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);

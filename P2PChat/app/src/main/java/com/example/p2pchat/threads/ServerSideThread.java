@@ -40,7 +40,7 @@ public class ServerSideThread extends Thread {
         try {
 
             serverSocket = new ServerSocket(8080);
-            Log.d(TAG, "run: SOCKET IS: " + socket);
+            Log.d(TAG, "run:SERVER SOCKET INITIALIZED");
 
             socket = serverSocket.accept();
             Log.d(TAG, "run: SOCKET IS AFTER ACCEPT: " + socket);

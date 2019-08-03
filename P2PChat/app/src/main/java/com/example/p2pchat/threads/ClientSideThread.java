@@ -11,7 +11,7 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 
 
-public class ClientSideThread extends Thread{
+public class ClientSideThread extends Thread {
 
     InetAddress address;
     private Socket socket;
@@ -25,11 +25,11 @@ public class ClientSideThread extends Thread{
         return sendAndReceive;
     }
 
-    public Socket getSocket(){
+    public Socket getSocket() {
         return socket;
     }
 
-    public ClientSideThread(InetAddress address, Handler handler, MainActivity activity){
+    public ClientSideThread(InetAddress address, Handler handler, MainActivity activity) {
         socket = new Socket();
         this.address = address;
         this.activity = activity;
@@ -39,13 +39,16 @@ public class ClientSideThread extends Thread{
     @Override
     public void run() {
         try {
-            socket.connect(new InetSocketAddress(address.getHostAddress(),8080),1000);
-            sendAndReceive = new SendAndReceive(socket,handler,activity);
-            Log.d(TAG, "run: INITIALIZED SEND AND RECEIVE" + sendAndReceive);
+            if(address != null && socket != null) {
+                socket.connect(new InetSocketAddress(address.getHostAddress(), 8080), 1000);
+                Log.d(TAG, "run:CLIENT SOCKET INITIALIZED");
+                sendAndReceive = new SendAndReceive(socket, handler, activity);
+                Log.d(TAG, "run: INITIALIZED SEND AND RECEIVE" + sendAndReceive);
 
-            sendAndReceive.start();
-            Log.d(TAG, "run: sending msg from client");
-            sendAndReceive.write("gamadjobaa".getBytes());
+                sendAndReceive.start();
+                Log.d(TAG, "run: sending msg from client");
+                sendAndReceive.write("gamadjobaa".getBytes());
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
