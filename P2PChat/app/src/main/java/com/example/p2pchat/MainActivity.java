@@ -220,9 +220,7 @@ public class MainActivity extends AppCompatActivity
             } else {
                 Log.d(TAG, "onConnectionInfoAvailable: YOU ARE THE CLIENT");
                 Toast.makeText(MainActivity.this, "YOU ARE THE CLIENT", Toast.LENGTH_SHORT).show();
-                if (client != null) {
-                    return;
-                }
+
                 client = new ClientSideThread(groupOwnerAddress, handler, MainActivity.this);
                 Log.d(TAG, "onConnectionInfoAvailable:Client THREAD CREATED!!!");
                 client.start();

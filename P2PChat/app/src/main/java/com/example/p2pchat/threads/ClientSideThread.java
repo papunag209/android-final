@@ -40,6 +40,7 @@ public class ClientSideThread extends Thread{
     public void run() {
         try {
             socket.connect(new InetSocketAddress(address.getHostAddress(),8080),1000);
+            Log.d(TAG, "run:CLIENT SOCKET INITIALIZED");
             sendAndReceive = new SendAndReceive(socket,handler,activity);
             Log.d(TAG, "run: INITIALIZED SEND AND RECEIVE" + sendAndReceive);
 
