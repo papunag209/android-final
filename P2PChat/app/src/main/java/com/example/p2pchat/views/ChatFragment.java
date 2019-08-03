@@ -1,14 +1,18 @@
 package com.example.p2pchat.views;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -43,6 +47,7 @@ public class ChatFragment extends Fragment {
     EditText messageText;
     ImageButton backButton;
     ImageButton deleteButton;
+    NavController navController;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -66,6 +71,7 @@ public class ChatFragment extends Fragment {
         backButton = view.findViewById(R.id.imageButton_chatBack);
         deleteButton = view.findViewById(R.id.imageButton_deleteThisMessage);
 
+
         Boolean isHistoryMode = getArguments().getBoolean("HistoryMode");
         if(isHistoryMode){
             messageText.setVisibility(View.GONE);
@@ -79,6 +85,7 @@ public class ChatFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         chatFragmentViewModel = ViewModelProviders.of(this).get(ChatFragmentViewModel.class);
+        navController = Navigation.findNavController(this.getView());
 
         Long sessionId = getArguments().getLong("SessionId");
         if (sessionId == null){
@@ -95,16 +102,20 @@ public class ChatFragment extends Fragment {
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                chatFragmentViewModel.sendMessage(messageText.getText().toString());
-//                long start = System.currentTimeMillis(); todo: clear this for stress testing of async calls
-//                for (int i=0; i<10000; i++){
-//                    chatFragmentViewModel.sendMessage(messageText.getText().toString());
-//                }
-//                long end = System.currentTimeMillis();
-//                Log.d(TAG, "onClick: 10000 items to send in: " + (end-start) + "ms");
-
                 chatFragmentViewModel.sendMessage(messageText.getText().toString());
                 messageText.setText("");
+            }
+        });
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                navController.navigateUp();
+            }
+        });
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                displayDeletePopup();
             }
         });
     }
@@ -121,6 +132,9 @@ public class ChatFragment extends Fragment {
             @Override
             public void onChanged(Session session) {
                 Log.d(TAG, "onChanged: session changed to: " + session);
+                if (session == null){
+                    navController.navigateUp();
+                }
             }
         });
         LiveData<SessionWithMessageCount> s;
@@ -131,6 +145,38 @@ public class ChatFragment extends Fragment {
                 Log.d(TAG, "onChanged: session with message count: " + sessionWithMessageCount);
             }
         });
+    }
+
+    private void displayDeletePopup(){
+        popUpDialogue("Yes",
+                "Do you want to delete this Chat?",
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        chatFragmentViewModel.deleteThisSession();
+                    }
+                },
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+
+                    }
+                });
+    }
+
+    public AlertDialog popUpDialogue(String positiveLabel,
+                                     String popupMessage,
+                                     DialogInterface.OnClickListener positiveOnClick,
+                                     DialogInterface.OnClickListener negativeOnClick) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setCancelable(true);
+        builder.setMessage(popupMessage);
+        builder.setPositiveButton(positiveLabel, positiveOnClick);
+        builder.setNegativeButton("Cancel", negativeOnClick);
+
+        AlertDialog alert = builder.create();
+        alert.show();
+        return alert;
     }
 
     private void initRecyclerView(){
