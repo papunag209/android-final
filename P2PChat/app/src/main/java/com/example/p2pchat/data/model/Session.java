@@ -1,12 +1,15 @@
 package com.example.p2pchat.data.model;
 
+import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
 import java.sql.Time;
 import java.sql.Timestamp;
 
-@Entity
+@Entity(indices = {@Index(value = {"PeerMAC"},
+        unique = true)})
 public class Session {
 
     @PrimaryKey(autoGenerate = true)
@@ -14,7 +17,17 @@ public class Session {
 
     String SessionStartTime;
 
+    public String getPeerMAC() {
+        return PeerMAC;
+    }
+
+    public void setPeerMAC(String peerMAC) {
+        PeerMAC = peerMAC;
+    }
+
     String PeerPhoneName;
+
+    String PeerMAC;
 
     public Long getSessionId() {
         return SessionId;

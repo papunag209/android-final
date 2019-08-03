@@ -80,17 +80,14 @@ public class DummyFragment extends Fragment {
 
     void populateDb(int numHistoryItems){
         DataDao dao = Database.getInstance().dataDao();
+        Log.d(TAG, "populateDb: populated");
 
         //populate sessions
         Session s = new Session();
-        s.setPeerPhoneName("papuna");
+        s.setPeerPhoneName("123");
+        s.setPeerMAC("zzz");
         s.setSessionStartTime(Calendar.getInstance().getTime().toString());
-        Long sessionId = dao.insertSession(s);
-        s = new Session();
-        s.setPeerPhoneName("Cira");
-        s.setSessionStartTime(Calendar.getInstance().getTime().toString());
-        Single<Long> single = dao.inserSessionAsync(s);
-        single.subscribe(new SingleObserver<Long>() {
+        dao.inserSessionAsync(s).subscribe(new SingleObserver<Long>() {
             @Override
             public void onSubscribe(Disposable d) {
 
@@ -98,42 +95,62 @@ public class DummyFragment extends Fragment {
 
             @Override
             public void onSuccess(Long aLong) {
-                Log.d(TAG, "onSuccess: SingleObserver return value: " + aLong);
+                Log.d(TAG, "onSuccess: Session id is: " + aLong);
             }
 
             @Override
             public void onError(Throwable e) {
-                Log.e(TAG, "onError: ", e);
+                Log.d(TAG, "onError: ");
             }
         });
-
-        Log.d(TAG, "populateDb: session id: "+ sessionId);
-        Log.d(TAG, "populateDb: session id from obj: " + sessionId);
-
-        LiveData<Session> sessionLiveData = dao.getSessionById(sessionId);
-        sessionLiveData.observe(this, new Observer<Session>() {
-            @Override
-            public void onChanged(Session session) {
-                Log.d(TAG, "onChanged: session: " + session);
-            }
-        });
-
-        Message m = new Message();
-        m.setMessageTime(Calendar.getInstance().getTime().toString());
-        m.setSessionId(sessionId);
-        m.setMessageText("Oee sada xar?");
-        dao.insertMessage(m);
-        m.setMessageTime(Calendar.getInstance().getTime().toString());
-        m.setMessageText("aq var brat shen sada xar");
-        dao.insertMessage(m);
-
-        LiveData<List<Message>> messages = dao.getMessages(sessionId);
-        messages.observe(this, new Observer<List<Message>>() {
-            @Override
-            public void onChanged(List<Message> messages) {
-                Log.d(TAG, "onChanged: messages: " + messages);
-            }
-        });
+//        s = new Session();
+//        s.setPeerPhoneName("Cira");
+//        s.setSessionStartTime(Calendar.getInstance().getTime().toString());
+//        Single<Long> single = dao.inserSessionAsync(s);
+//        single.subscribe(new SingleObserver<Long>() {
+//            @Override
+//            public void onSubscribe(Disposable d) {
+//
+//            }
+//
+//            @Override
+//            public void onSuccess(Long aLong) {
+//                Log.d(TAG, "onSuccess: SingleObserver return value: " + aLong);
+//            }
+//
+//            @Override
+//            public void onError(Throwable e) {
+//                Log.e(TAG, "onError: ", e);
+//            }
+//        });
+//
+//        Log.d(TAG, "populateDb: session id: "+ sessionId);
+//        Log.d(TAG, "populateDb: session id from obj: " + sessionId);
+//
+//        LiveData<Session> sessionLiveData = dao.getSessionById(sessionId);
+//        sessionLiveData.observe(this, new Observer<Session>() {
+//            @Override
+//            public void onChanged(Session session) {
+//                Log.d(TAG, "onChanged: session: " + session);
+//            }
+//        });
+//
+//        Message m = new Message();
+//        m.setMessageTime(Calendar.getInstance().getTime().toString());
+//        m.setSessionId(sessionId);
+//        m.setMessageText("Oee sada xar?");
+//        dao.insertMessage(m);
+//        m.setMessageTime(Calendar.getInstance().getTime().toString());
+//        m.setMessageText("aq var brat shen sada xar");
+//        dao.insertMessage(m);
+//
+//        LiveData<List<Message>> messages = dao.getMessages(sessionId);
+//        messages.observe(this, new Observer<List<Message>>() {
+//            @Override
+//            public void onChanged(List<Message> messages) {
+//                Log.d(TAG, "onChanged: messages: " + messages);
+//            }
+//        });
     }
 
     void clearDb(){
