@@ -17,10 +17,12 @@ import io.reactivex.Completable;
 import io.reactivex.Single;
 
 public class MainFragmentViewModel extends ViewModel {
-    private MutableLiveData<Collection<WifiP2pDevice>> collectionLiveData;
+    private LiveData<Collection<WifiP2pDevice>> collectionLiveData;
     private DataDao dao;
     private MutableLiveData<Boolean> loadingOverlayVisible;
     private String loadingOverlayLabel;
+
+    private static final String TAG = "MainFragmentViewModel";
 
     public MainFragmentViewModel() {
         this.dao = Database.getInstance().dataDao();
@@ -29,7 +31,7 @@ public class MainFragmentViewModel extends ViewModel {
         this.loadingOverlayVisible.setValue(false);
     }
 
-    public void init(MutableLiveData<Collection<WifiP2pDevice>> collectionLiveData){
+    public void init(LiveData<Collection<WifiP2pDevice>> collectionLiveData){
         this.collectionLiveData = collectionLiveData;
     }
 
