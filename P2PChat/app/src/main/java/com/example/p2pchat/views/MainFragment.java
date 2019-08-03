@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -26,6 +27,7 @@ import com.example.p2pchat.R;
 import com.example.p2pchat.adapters.PeersRecyclerViewAdapter;
 import com.example.p2pchat.data.model.dataholder.PeerStatusHolder;
 import com.example.p2pchat.threads.SendAndReceive;
+import com.example.p2pchat.viewModels.MainFragmentViewModel;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,6 +39,7 @@ import static com.example.p2pchat.MainActivity.getDeviceStatus;
 public class MainFragment extends Fragment {
     private static final String TAG = "MainFragment";
     RecyclerView recyclerView;
+    MainFragmentViewModel mainFragmentViewModel;
     PeersRecyclerViewAdapter recyclerViewAdapter;
     WifiP2pDevice[] peerLst;
     Button btn;
@@ -72,26 +75,20 @@ public class MainFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        mainFragmentViewModel = ViewModelProviders.of(this).get(MainFragmentViewModel.class);
+        //TODO CHECK ACTIVITY
+        mainFragmentViewModel.init(((MainActivity) getActivity()).getPeers());
 //        recyclerViewAdapter = (PeersRecyclerViewAdapter)recyclerView.getAdapter();
-        final MutableLiveData<Collection<WifiP2pDevice>> peers = ((MainActivity) getActivity()).getPeers();
-        peers.observe(this, new Observer<Collection<WifiP2pDevice>>() {
+        mainFragmentViewModel.getCollectionLiveData().observe(this, new Observer<Collection<WifiP2pDevice>>() {
             @Override
             public void onChanged(Collection<WifiP2pDevice> s) {
                 Log.d(TAG, "onChanged: SOMETHING CHANGED!!!");
                 ArrayList<PeerStatusHolder> peerStatuses = new ArrayList<PeerStatusHolder>();
                 for (WifiP2pDevice device : s) {
                     peerStatuses.add(new PeerStatusHolder(device.deviceName, getDeviceStatus(device.status)));
-//                    boolean isConnected = false;
-//                    if(device.status == WifiP2pDevice.CONNECTED){
-//                        isConnected = true;
-//                    }
-//                    MainActivity activity = (MainActivity) getActivity();
-//                    if(isConnected && activity.getClient()== null && activity.getServer() == null){
-//                        activity.removeConnection();
-//                    }
                 }
                 ((PeersRecyclerViewAdapter) recyclerView.getAdapter()).setDataSet(peerStatuses);
-                peerLst = peers.getValue().toArray(new WifiP2pDevice[peers.getValue().size()]);
+                peerLst = s.toArray(new WifiP2pDevice[s.size()]);
 
             }
         });

@@ -22,12 +22,15 @@ public class MainFragmentViewModel extends ViewModel {
     private MutableLiveData<Boolean> loadingOverlayVisible;
     private String loadingOverlayLabel;
 
-    public MainFragmentViewModel(MutableLiveData<Collection<WifiP2pDevice>> collectionLiveData) {
-        this.collectionLiveData = collectionLiveData;
+    public MainFragmentViewModel() {
         this.dao = Database.getInstance().dataDao();
         this.loadingOverlayLabel = "";
         this.loadingOverlayVisible = new MutableLiveData<>();
         this.loadingOverlayVisible.setValue(false);
+    }
+
+    public void init(MutableLiveData<Collection<WifiP2pDevice>> collectionLiveData){
+        this.collectionLiveData = collectionLiveData;
     }
 
     public void setLoadingOverlayVisible(Boolean loadingOverlayVisible) {
