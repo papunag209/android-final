@@ -168,9 +168,7 @@ public class MainActivity extends AppCompatActivity
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
             }
-
         }
         if (client != null && client.getSocket() != null) {
             try {
@@ -270,7 +268,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onSuccess() {
                 Log.d(TAG, "Connected to device: " + device.deviceName);
-                connectedDevice.postValue(device);
+//                connectedDevice.postValue(device);
             }
 
             @Override
@@ -310,7 +308,7 @@ public class MainActivity extends AppCompatActivity
 //        wifiManager.setWifiEnabled(false);
         wManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         wChannel = wManager.initialize(this, getMainLooper(), null);
-        wReceiver = new WifiBroadcastReceiver(wChannel, wManager, peerListListener, connectionInfoListener);
+        wReceiver = new WifiBroadcastReceiver(wChannel, wManager, peerListListener, connectionInfoListener,connectedDevice);
 
         wFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
         wFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);

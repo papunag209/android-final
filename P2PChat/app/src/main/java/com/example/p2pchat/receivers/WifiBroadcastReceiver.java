@@ -11,6 +11,8 @@ import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.util.Log;
 
+import androidx.lifecycle.MutableLiveData;
+
 import com.example.p2pchat.MainActivity;
 
 import static com.example.p2pchat.MainActivity.getDeviceStatus;
@@ -21,13 +23,15 @@ public class WifiBroadcastReceiver extends BroadcastReceiver {
     private WifiP2pManager wManager;
     private WifiP2pManager.ConnectionInfoListener connectionInfoListener;
     private WifiP2pManager.PeerListListener peerListListener;
+    private MutableLiveData<WifiP2pDevice> connectedDevice;
 
 
-    public WifiBroadcastReceiver(WifiP2pManager.Channel wChannel, WifiP2pManager wManager, WifiP2pManager.PeerListListener peerListListener, WifiP2pManager.ConnectionInfoListener connectionInfoListener) {
+    public WifiBroadcastReceiver(WifiP2pManager.Channel wChannel, WifiP2pManager wManager, WifiP2pManager.PeerListListener peerListListener, WifiP2pManager.ConnectionInfoListener connectionInfoListener, MutableLiveData<WifiP2pDevice> connectedDevice) {
         this.wChannel = wChannel;
         this.wManager = wManager;
         this.peerListListener = peerListListener;
         this.connectionInfoListener = connectionInfoListener;
+        this.connectedDevice = connectedDevice;
     }
 
     @Override
@@ -62,8 +66,10 @@ public class WifiBroadcastReceiver extends BroadcastReceiver {
             if (device == null) {
                 Log.d(TAG, "onReceive: Device is null");
             } else {
-                String status = getDeviceStatus(device.status);
-
+                if(device.status == WifiP2pDevice.CONNECTED){
+                    connectedDevice.postValue(device);
+                }
+                Log.d(TAG, "onReceive: DEVICE IS " + device);
             }
         }
     }
