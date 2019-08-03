@@ -66,6 +66,8 @@ public class MainFragment extends Fragment {
                 if (sendAndReceive != null) {
                     Log.d(TAG, "onClick: SENDING MESSAGE");
                     sendAndReceive.write("HELLO".getBytes());
+                }else{
+                    ((MainActivity) getActivity()).removeConnection();
                 }
             }
         });
