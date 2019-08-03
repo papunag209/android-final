@@ -76,6 +76,8 @@ public class ChatFragment extends Fragment {
         if(isHistoryMode){
             messageText.setVisibility(View.GONE);
             sendButton.setVisibility(View.GONE);
+        } else {
+            deleteButton.setVisibility(View.INVISIBLE);
         }
         return view;
     }
