@@ -23,15 +23,13 @@ public class WifiBroadcastReceiver extends BroadcastReceiver {
     private WifiP2pManager wManager;
     private WifiP2pManager.ConnectionInfoListener connectionInfoListener;
     private WifiP2pManager.PeerListListener peerListListener;
-    private MutableLiveData<WifiP2pDevice> connectedDevice;
 
 
-    public WifiBroadcastReceiver(WifiP2pManager.Channel wChannel, WifiP2pManager wManager, WifiP2pManager.PeerListListener peerListListener, WifiP2pManager.ConnectionInfoListener connectionInfoListener, MutableLiveData<WifiP2pDevice> connectedDevice) {
+    public WifiBroadcastReceiver(WifiP2pManager.Channel wChannel, WifiP2pManager wManager, WifiP2pManager.PeerListListener peerListListener, WifiP2pManager.ConnectionInfoListener connectionInfoListener) {
         this.wChannel = wChannel;
         this.wManager = wManager;
         this.peerListListener = peerListListener;
         this.connectionInfoListener = connectionInfoListener;
-        this.connectedDevice = connectedDevice;
     }
 
     @Override
@@ -40,7 +38,7 @@ public class WifiBroadcastReceiver extends BroadcastReceiver {
 
         assert msg != null;
 
-        Log.d(TAG, "onReceive: SOMETHING CAME IN!!!");
+        Log.d(TAG, "onReceive: SOMETHING CAME IN!!!" + msg);
 
         if (msg.equals(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION)) {
             Log.d(TAG, "onReceive: ");
@@ -62,15 +60,15 @@ public class WifiBroadcastReceiver extends BroadcastReceiver {
                 wManager.requestPeers(wChannel, peerListListener);
             }
         } else if (msg.equals(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION)) {
-            WifiP2pDevice device = intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_DEVICE);
-            if (device == null) {
-                Log.d(TAG, "onReceive: Device is null");
-            } else {
-                if(device.status == WifiP2pDevice.CONNECTED){
-                    connectedDevice.postValue(device);
-                }
-                Log.d(TAG, "onReceive: DEVICE IS " + device);
-            }
+//            WifiP2pDevice device = intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_DEVICE);
+//            if (device == null) {
+//                Log.d(TAG, "onReceive: Device is null");
+//            } else {
+//                if(device.status == WifiP2pDevice.CONNECTED){
+//                    Log.d(TAG, "boradcastReceiver onReceive: DEVICE IS " + device);
+//                    connectedDevice.postValue(device);
+//                }
+//            }
         }
     }
 }

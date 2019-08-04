@@ -5,6 +5,8 @@ import androidx.room.ForeignKey;
 import androidx.room.PrimaryKey;
 
 
+import java.io.Serializable;
+
 import static androidx.room.ForeignKey.CASCADE;
 
 @Entity(foreignKeys = @ForeignKey(  entity = Session.class,
@@ -12,7 +14,7 @@ import static androidx.room.ForeignKey.CASCADE;
         childColumns = "SessionId",
         onDelete = CASCADE
 ))
-public class Message {
+public class Message implements Serializable {
     @PrimaryKey(autoGenerate = true)
     Long MessageId;
 
@@ -66,6 +68,6 @@ public class Message {
 
     @Override
     public String toString() {
-        return this.getMessageText() + "|" + this.getMessageId() + "|" + this.getMessageTime();
+        return this.getMessageText() + "|" + this.getMessageId() + "|" + this.getMessageTime() + '|' + getSessionId();
     }
 }

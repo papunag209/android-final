@@ -4,6 +4,8 @@ import androidx.room.Entity;
 
 import com.example.p2pchat.data.model.Message;
 
+import java.io.Serializable;
+
 @Entity
 public class MessageWithMacAddress extends Message {
 

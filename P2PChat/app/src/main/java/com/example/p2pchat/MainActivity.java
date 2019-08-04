@@ -7,17 +7,17 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.net.InetAddresses;
 import android.net.Uri;
-import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
+import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 
-import com.example.p2pchat.adapters.PeersRecyclerViewAdapter;
+import com.example.p2pchat.data.Database;
+import com.example.p2pchat.data.model.helperModel.MessageWithMacAddress;
 import com.example.p2pchat.interfaces.P2pController;
 import com.example.p2pchat.receivers.WifiBroadcastReceiver;
 import com.example.p2pchat.threads.ClientSideThread;
@@ -48,7 +48,6 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
@@ -57,11 +56,11 @@ import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
 
 import android.view.Menu;
-import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
+import org.apache.commons.lang3.SerializationUtils;
+
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -76,7 +75,8 @@ public class MainActivity extends AppCompatActivity
     BroadcastReceiver wReceiver;
     IntentFilter wFilter = new IntentFilter();
     ClientSideThread client;
-    MutableLiveData<WifiP2pDevice> connectedDevice = new MutableLiveData<>();
+    MutableLiveData<WifiP2pDevice> connectedDeviceLiveData = new MutableLiveData<>();
+    WifiP2pDevice connectedDevice = null;
 
     public ClientSideThread getClient() {
         return client;
@@ -134,8 +134,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public LiveData<WifiP2pDevice> getConnectedDevice() {
-        return this.connectedDevice;
+    public LiveData<WifiP2pDevice> getConnectedDeviceLiveData() {
+        return this.connectedDeviceLiveData;
+    }
+
+    @Override
+    public void setConnectedDevice(WifiP2pDevice connectedDevice) {
+        this.connectedDevice = connectedDevice;
     }
 
     @Override
@@ -232,7 +237,11 @@ public class MainActivity extends AppCompatActivity
             InetAddress groupOwnerAddress = wifiP2pInfo.groupOwnerAddress;
             Log.d(TAG, "onConnectionInfoAvailable: TRYING TO REINIT SERVER AND CLIENT");
             closeSockets();
+
             if (wifiP2pInfo.groupFormed && wifiP2pInfo.isGroupOwner) {
+                Log.d(TAG, "onConnectionInfoAvailable: REQUESTING GROUP INFO");
+
+                wManager.requestGroupInfo(wChannel,groupInfoListener);
                 Log.d(TAG, "onConnectionInfoAvailable: YOU ARE THE HOST");
                 Toast.makeText(MainActivity.this, "YOU ARE THE HOST", Toast.LENGTH_SHORT).show();
 
@@ -241,6 +250,8 @@ public class MainActivity extends AppCompatActivity
                 server.start();
                 Log.d(TAG, "onConnectionInfoAvailable:Server THREAD STARTED");
             } else {
+                Log.d(TAG, "onConnectionInfoAvailable: REQUESTING GROUP INFO");
+                wManager.requestGroupInfo(wChannel,groupInfoListener);
                 Log.d(TAG, "onConnectionInfoAvailable: YOU ARE THE CLIENT");
                 Toast.makeText(MainActivity.this, "YOU ARE THE CLIENT", Toast.LENGTH_SHORT).show();
 
@@ -270,7 +281,8 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onSuccess() {
                 Log.d(TAG, "Connected to device: " + device.deviceName);
-//                connectedDevice.postValue(device);
+                Log.d(TAG, "onSuccess: CONNECTED TO DEVICE: " + device);
+                connectedDeviceLiveData.postValue(device);
             }
 
             @Override
@@ -286,7 +298,7 @@ public class MainActivity extends AppCompatActivity
         @Override
         public boolean handleMessage(@NonNull Message message) {
 
-            Log.d(TAG, "MESSAGE CAME IN: " + message.arg1);
+            Log.d(TAG, "MESSAGE CAME IN: " + message);
 
 
             switch (message.what) {
@@ -295,6 +307,20 @@ public class MainActivity extends AppCompatActivity
                     String tempMsg = new String(readBuff, 0, message.arg1);
                     //TODO MESSAGE ARRIVED
 
+                    Log.d(TAG, "handleMessage: RECEIVED MSG: " + readBuff);
+                    Log.d(TAG, "handleMessage: TRYING TO DESERIALIZE MSG AS MESSAGE ");
+                    MessageWithMacAddress msg = null;
+                    try {
+                        msg = (MessageWithMacAddress) SerializationUtils.deserialize(readBuff);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                        Log.d(TAG, "handleMessage: FAILED TO DESERIALIZE MSG");
+                    }
+
+                    Log.d(TAG, "handleMessage: DESERIALIZED MSG: " + msg);
+                    if(msg != null){
+
+                    }
                     Toast.makeText(MainActivity.this, "Message read: " + tempMsg, Toast.LENGTH_SHORT).show();
                     break;
 
@@ -302,21 +328,64 @@ public class MainActivity extends AppCompatActivity
             return true;
         }
     });
+//
+//    private void testSerialization(){
+//        MessageWithMacAddress testmsg = new MessageWithMacAddress();
+//        testmsg.setMessageId(1L);
+//        testmsg.setSessionId(10L);
+//        testmsg.setMessageTime("THIS IS TIME");
+//        testmsg.setMessageStatus("STATUSI");
+//        testmsg.setMessageText("MESSAGE TEXT");
+//        testmsg.setPeerMac("PEERIS MAC ADRESI");
+//        sendPendingMessage(testmsg);
+//    }
 
+
+    WifiP2pManager.GroupInfoListener groupInfoListener = new WifiP2pManager.GroupInfoListener() {
+        @Override
+        public void onGroupInfoAvailable(WifiP2pGroup wifiP2pGroup) {
+            Log.d(TAG, "onGroupInfoAvailable: SHEMOVEDI AQANE");
+            if(wifiP2pGroup != null) {
+                Log.d(TAG, "onGroupInfoAvailable: wifiP2pGroupList: " + wifiP2pGroup.getClientList());
+                if(wifiP2pGroup.getClientList().size() > 0){
+                    connectedDeviceLiveData.postValue(wifiP2pGroup.getClientList().iterator().next());
+                }
+            }
+        }
+    };
 
     private void startApp() {
 //        WifiManager wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 //        wifiManager.setWifiEnabled(true);
 //        wifiManager.setWifiEnabled(false);
+
+
         wManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         wChannel = wManager.initialize(this, getMainLooper(), null);
-        wReceiver = new WifiBroadcastReceiver(wChannel, wManager, peerListListener, connectionInfoListener,connectedDevice);
+        wReceiver = new WifiBroadcastReceiver(wChannel, wManager, peerListListener, connectionInfoListener);
 
         wFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
         wFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
         wFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         wFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
         removeConnection();
+//        testSerialization();
+        Database.getInstance().dataDao().getPendingMessages().observe(this, new Observer<List<MessageWithMacAddress>>() {
+            @Override
+            public void onChanged(List<MessageWithMacAddress> messageWithMacAddresses) {
+                Log.d(TAG, "onChanged: GOT PENDING MSG LIST:" + messageWithMacAddresses);
+                for(MessageWithMacAddress msg : messageWithMacAddresses){
+//                    Log.d(TAG, "onChanged: msg:" + msg);
+//                    Log.d(TAG, "onChanged: msg.peermac:" + msg.getPeerMac());
+//                    if(connectedDevice != null && msg != null && msg.getPeerMac().equals(connectedDevice.deviceAddress)){
+                    if(connectedDevice != null) {
+                        sendPendingMessage(msg);
+                    }
+//                    }
+                }
+
+            }
+        });
 
         final Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -352,6 +421,21 @@ public class MainActivity extends AppCompatActivity
             }
         });
     }
+
+    private void sendPendingMessage(MessageWithMacAddress msg){
+//        getSendAndReceive().write(msg);
+        if(getSendAndReceive() != null) {
+            Log.d(TAG, "sendPendingMessage: TRYING TO SEND MESSAGE: " + msg);
+            byte[] msgBytes = SerializationUtils.serialize(msg);
+            Log.d(TAG, "sendPendingMessage: serializedmsg: " + msgBytes);
+            getSendAndReceive().write(msgBytes);
+            Log.d(TAG, "sendPendingMessage: SENT MESSAGE!" + msg);
+            MessageWithMacAddress result = (MessageWithMacAddress) SerializationUtils.deserialize(msgBytes);
+            Log.d(TAG, "sendPendingMessage: DESERIALIZED MSG SHOUULD BE :" + result);
+        }else{
+            Log.d(TAG, "sendPendingMessage: SEND AND RECEIVE IS NULL!!!");
+        }
+       }
 
     private void discoverPeers() {
         wManager.discoverPeers(wChannel, new WifiP2pManager.ActionListener() {

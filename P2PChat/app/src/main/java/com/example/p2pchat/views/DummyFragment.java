@@ -65,7 +65,13 @@ public class DummyFragment extends Fragment {
         view.findViewById(R.id.button3).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                clearDb();
+//                clearDb();
+                Database.getInstance().dataDao().getPendingMessages().observe(DummyFragment.this, new Observer<List<MessageWithMacAddress>>() {
+                    @Override
+                    public void onChanged(List<MessageWithMacAddress> messageWithMacAddresses) {
+                        Log.d(TAG, "onChanged: messageWithMacAddress: " + messageWithMacAddresses);
+                    }
+                });
             }
         });
 
@@ -95,29 +101,29 @@ public class DummyFragment extends Fragment {
         //populate sessions
         Session s = new Session();
         s.setPeerPhoneName("123");
-        s.setPeerMac("3c:45:1f");
+        s.setPeerMac("3c:33:33");
         s.setSessionStartTime(Calendar.getInstance().getTime().toString());
         Long sessionId = dao.insertSession(s);
-        s = new Session();
-        s.setPeerPhoneName("Cira");
-        s.setSessionStartTime(Calendar.getInstance().getTime().toString());
-        Single<Long> single = dao.inserSessionAsync(s);
-        single.subscribe(new SingleObserver<Long>() {
-            @Override
-            public void onSubscribe(Disposable d) {
-
-            }
-
-            @Override
-            public void onSuccess(Long aLong) {
-                Log.d(TAG, "onSuccess: SingleObserver return value: " + aLong);
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                Log.e(TAG, "onError: ", e);
-            }
-        });
+//        s = new Session();
+//        s.setPeerPhoneName("Cira");
+//        s.setSessionStartTime(Calendar.getInstance().getTime().toString());
+//        Single<Long> single = dao.inserSessionAsync(s);
+//        single.subscribe(new SingleObserver<Long>() {
+//            @Override
+//            public void onSubscribe(Disposable d) {
+//
+//            }
+//
+//            @Override
+//            public void onSuccess(Long aLong) {
+//                Log.d(TAG, "onSuccess: SingleObserver return value: " + aLong);
+//            }
+//
+//            @Override
+//            public void onError(Throwable e) {
+//                Log.e(TAG, "onError: ", e);
+//            }
+//        });
 
         Log.d(TAG, "populateDb: session id: "+ sessionId);
         Log.d(TAG, "populateDb: session id from obj: " + sessionId);
@@ -137,6 +143,7 @@ public class DummyFragment extends Fragment {
         dao.insertMessage(m);
         m.setMessageTime(Calendar.getInstance().getTime().toString());
         m.setMessageText("aq var brat shen sada xar");
+        m.setMessageStatus("PENDING");
         dao.insertMessage(m);
 
         LiveData<List<Message>> messages = dao.getMessages(sessionId);

@@ -39,4 +39,6 @@ dependencies {
     implementation "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
     implementation "androidx.room:room-rxjava2:$room_version"
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.0'
+
 }

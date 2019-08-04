@@ -9,6 +9,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -22,6 +24,7 @@ import com.example.p2pchat.App;
 import com.example.p2pchat.MainActivity;
 import com.example.p2pchat.R;
 import com.example.p2pchat.adapters.PeersRecyclerViewAdapter;
+import com.example.p2pchat.data.Database;
 import com.example.p2pchat.data.model.dataholder.PeerStatusHolder;
 import com.example.p2pchat.interfaces.P2pController;
 import com.example.p2pchat.threads.SendAndReceive;
@@ -39,6 +42,7 @@ import static com.example.p2pchat.MainActivity.getDeviceStatus;
 public class MainFragment extends Fragment {
     private static final String TAG = "MainFragment";
     RecyclerView recyclerView;
+    NavController navController;
     MainFragmentViewModel mainFragmentViewModel;
     PeersRecyclerViewAdapter recyclerViewAdapter;
     WifiP2pDevice[] peerLst;
@@ -85,6 +89,7 @@ public class MainFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        navController = Navigation.findNavController(this.getView());
         mainFragmentViewModel = ViewModelProviders.of(this).get(MainFragmentViewModel.class);
         //TODO CHECK ACTIVITY
         mainFragmentViewModel.init(p2pController.getPeerLiveData());
@@ -103,11 +108,14 @@ public class MainFragment extends Fragment {
             }
         });
 
-        p2pController.getConnectedDevice().observe(this, new Observer<WifiP2pDevice>() {
+        p2pController.getConnectedDeviceLiveData().observe(this, new Observer<WifiP2pDevice>() {
             @Override
-            public void onChanged(WifiP2pDevice device) {
+            public void onChanged(final WifiP2pDevice device) {
                 Log.d(TAG, "onChanged: changed device: " + device);
                 if (device != null) {
+                    p2pController.setConnectedDevice(device);
+
+                    Log.d(TAG, "onChanged:Connected Device Address Is: " + device.deviceAddress);
                     mainFragmentViewModel.registerSession(device.deviceAddress).subscribe(new SingleObserver<Long>() {
                         @Override
                         public void onSubscribe(Disposable d) {
@@ -116,12 +124,21 @@ public class MainFragment extends Fragment {
 
                         @Override
                         public void onSuccess(Long aLong) {
+                            Log.d(TAG, "onSuccess: " + Database.getInstance().dataDao().getSessionsSync());
                             Log.d(TAG, "onSuccess: REGISTERED WITH :" + aLong);
+                            Log.d(TAG, "onSuccess: session is:" + Database.getInstance().dataDao().getSessionByIdSync(aLong));
+//                            Bundle args = new Bundle();
+//                            args.putLong("SessionId", aLong);
+//                            args.putString("PeerMac", device.deviceAddress);
+//                            navController.navigate(R.id.chatFragment, args);
                         }
 
                         @Override
                         public void onError(Throwable e) {
-
+                            Log.d(TAG, "onError: REGISTER FAILED");
+                            Bundle args = new Bundle();
+                            args.putString("PeerMac", device.deviceAddress);
+                            navController.navigate(R.id.chatFragment, args);
                         }
                     });
                 }
