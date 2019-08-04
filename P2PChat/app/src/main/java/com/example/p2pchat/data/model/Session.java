@@ -55,6 +55,8 @@ public class Session {
 
     @Override
     public String toString() {
-        return ""+getSessionId()+"|"+getPeerPhoneName()+"|"+getSessionStartTime();
+        return ""+getSessionId()+"|"+getPeerMAC()+"|"+getPeerPhoneName()+"|"+getSessionStartTime();
     }
+
+
 }
