@@ -2,7 +2,9 @@ package com.example.p2pchat.viewModels;
 
 import android.util.Log;
 
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModel;
 
 import com.example.p2pchat.data.DataDao;
@@ -33,6 +35,19 @@ public class ChatFragmentViewModel extends ViewModel {
         dao = Database.getInstance().dataDao();
         sessionLiveData = dao.getSessionById(sessionId);
         messagesListLiveData = dao.getMessages(sessionId);
+    }
+
+    public void init(String peerMac, LifecycleOwner lifecycleOwner) {
+//        this.sessionId = sessionId;
+        dao = Database.getInstance().dataDao();
+        sessionLiveData = dao.getSessionByMac(peerMac);
+        sessionLiveData.observe(lifecycleOwner, new Observer<Session>() {
+            @Override
+            public void onChanged(Session session) {
+                sessionId = session.getSessionId();
+                messagesListLiveData = dao.getMessages(sessionId);
+            }
+        });
     }
 
     public LiveData<List<Message>> getMessages() {

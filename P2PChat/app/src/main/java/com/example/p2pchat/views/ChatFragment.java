@@ -90,14 +90,17 @@ public class ChatFragment extends Fragment {
         navController = Navigation.findNavController(this.getView());
 
         Long sessionId = getArguments().getLong("SessionId");
-        if (sessionId == null) {
-            Log.d(TAG, "onViewCreated: No Session Given To Fragment");
-        } else {
+        String peerMac = getArguments().getString("PeerMac");
+        if (sessionId != null) {
             chatFragmentViewModel.init(sessionId);
-            initOnClickListeners();
-            initDataObservers();
-            initRecyclerView();
+        } if (peerMac != null){
+            chatFragmentViewModel.init(peerMac, this);
+        } else {
+            Log.d(TAG, "onViewCreated: No Session Id and Mac Given To Fragment");
         }
+        initOnClickListeners();
+        initDataObservers();
+        initRecyclerView();
     }
 
     private void initOnClickListeners() {
