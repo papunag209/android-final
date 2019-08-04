@@ -101,6 +101,10 @@ public class MainFragment extends Fragment {
                 ArrayList<PeerStatusHolder> peerStatuses = new ArrayList<PeerStatusHolder>();
                 for (WifiP2pDevice device : s) {
                     peerStatuses.add(new PeerStatusHolder(device.deviceName, getDeviceStatus(device.status)));
+                    if(device.status == WifiP2pDevice.CONNECTED){
+                        Log.d(TAG, "onChanged: AMASTAN VART DAQONEQTEBULI " + device);
+                        registerSessionForDevice(device);
+                    }
                 }
                 ((PeersRecyclerViewAdapter) recyclerView.getAdapter()).setDataSet(peerStatuses);
                 peerLst = s.toArray(new WifiP2pDevice[s.size()]);
@@ -108,42 +112,6 @@ public class MainFragment extends Fragment {
             }
         });
 
-        p2pController.getConnectedDeviceLiveData().observe(this, new Observer<WifiP2pDevice>() {
-            @Override
-            public void onChanged(final WifiP2pDevice device) {
-                Log.d(TAG, "onChanged: changed device: " + device);
-                if (device != null) {
-                    p2pController.setConnectedDevice(device);
-
-                    Log.d(TAG, "onChanged:Connected Device Address Is: " + device.deviceAddress);
-                    mainFragmentViewModel.registerSession(device.deviceAddress).subscribe(new SingleObserver<Long>() {
-                        @Override
-                        public void onSubscribe(Disposable d) {
-
-                        }
-
-                        @Override
-                        public void onSuccess(Long aLong) {
-                            Log.d(TAG, "onSuccess: " + Database.getInstance().dataDao().getSessionsSync());
-                            Log.d(TAG, "onSuccess: REGISTERED WITH :" + aLong);
-                            Log.d(TAG, "onSuccess: session is:" + Database.getInstance().dataDao().getSessionByIdSync(aLong));
-//                            Bundle args = new Bundle();
-//                            args.putLong("SessionId", aLong);
-//                            args.putString("PeerMac", device.deviceAddress);
-//                            navController.navigate(R.id.chatFragment, args);
-                        }
-
-                        @Override
-                        public void onError(Throwable e) {
-                            Log.d(TAG, "onError: REGISTER FAILED");
-                            Bundle args = new Bundle();
-                            args.putString("PeerMac", device.deviceAddress);
-                            navController.navigate(R.id.chatFragment, args);
-                        }
-                    });
-                }
-            }
-        });
 
         //TODO NEED TO GIVE PEER LIST HERE
         PeersRecyclerViewAdapter adapter = new PeersRecyclerViewAdapter(null, new PeersRecyclerViewAdapter.OnRecycleItem() {
@@ -163,6 +131,39 @@ public class MainFragment extends Fragment {
 
 
         Log.d(TAG, "onViewCreated: ACTIVITY" + getActivity());
+    }
+
+    private void registerSessionForDevice(final WifiP2pDevice device){
+        if (device != null) {
+            p2pController.setConnectedDevice(device);
+            Log.d(TAG, "registerSessionForDevice: CONNECTED DEVICE IS: " + device);
+            Log.d(TAG, "onChanged:Connected Device Address Is: " + device.deviceAddress);
+            mainFragmentViewModel.registerSession(device.deviceAddress).subscribe(new SingleObserver<Long>() {
+                @Override
+                public void onSubscribe(Disposable d) {
+
+                }
+
+                @Override
+                public void onSuccess(Long aLong) {
+                    Log.d(TAG, "onSuccess: " + Database.getInstance().dataDao().getSessionsSync());
+                    Log.d(TAG, "onSuccess: REGISTERED WITH :" + aLong);
+                    Log.d(TAG, "onSuccess: session is:" + Database.getInstance().dataDao().getSessionByIdSync(aLong));
+                    Bundle args = new Bundle();
+                    args.putLong("SessionId", aLong);
+                    args.putString("PeerMac", device.deviceAddress);
+                    navController.navigate(R.id.chatFragment, args);
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                    Log.d(TAG, "onError: REGISTER FAILED");
+                    Bundle args = new Bundle();
+                    args.putString("PeerMac", device.deviceAddress);
+                    navController.navigate(R.id.chatFragment, args);
+                }
+            });
+        }
     }
 
     @Override

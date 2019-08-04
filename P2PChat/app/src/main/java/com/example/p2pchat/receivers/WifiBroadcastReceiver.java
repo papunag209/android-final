@@ -24,7 +24,6 @@ public class WifiBroadcastReceiver extends BroadcastReceiver {
     private WifiP2pManager.ConnectionInfoListener connectionInfoListener;
     private WifiP2pManager.PeerListListener peerListListener;
 
-
     public WifiBroadcastReceiver(WifiP2pManager.Channel wChannel, WifiP2pManager wManager, WifiP2pManager.PeerListListener peerListListener, WifiP2pManager.ConnectionInfoListener connectionInfoListener) {
         this.wChannel = wChannel;
         this.wManager = wManager;
@@ -59,6 +58,8 @@ public class WifiBroadcastReceiver extends BroadcastReceiver {
             if (wManager != null) {
                 wManager.requestPeers(wChannel, peerListListener);
             }
+
+
         } else if (msg.equals(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION)) {
 //            WifiP2pDevice device = intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_DEVICE);
 //            if (device == null) {
@@ -66,7 +67,6 @@ public class WifiBroadcastReceiver extends BroadcastReceiver {
 //            } else {
 //                if(device.status == WifiP2pDevice.CONNECTED){
 //                    Log.d(TAG, "boradcastReceiver onReceive: DEVICE IS " + device);
-//                    connectedDevice.postValue(device);
 //                }
 //            }
         }

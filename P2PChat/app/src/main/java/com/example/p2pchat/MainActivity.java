@@ -75,7 +75,6 @@ public class MainActivity extends AppCompatActivity
     BroadcastReceiver wReceiver;
     IntentFilter wFilter = new IntentFilter();
     ClientSideThread client;
-    MutableLiveData<WifiP2pDevice> connectedDeviceLiveData = new MutableLiveData<>();
     WifiP2pDevice connectedDevice = null;
 
     public ClientSideThread getClient() {
@@ -133,10 +132,6 @@ public class MainActivity extends AppCompatActivity
         return this.peers;
     }
 
-    @Override
-    public LiveData<WifiP2pDevice> getConnectedDeviceLiveData() {
-        return this.connectedDeviceLiveData;
-    }
 
     @Override
     public void setConnectedDevice(WifiP2pDevice connectedDevice) {
@@ -241,7 +236,6 @@ public class MainActivity extends AppCompatActivity
             if (wifiP2pInfo.groupFormed && wifiP2pInfo.isGroupOwner) {
                 Log.d(TAG, "onConnectionInfoAvailable: REQUESTING GROUP INFO");
 
-                wManager.requestGroupInfo(wChannel,groupInfoListener);
                 Log.d(TAG, "onConnectionInfoAvailable: YOU ARE THE HOST");
                 Toast.makeText(MainActivity.this, "YOU ARE THE HOST", Toast.LENGTH_SHORT).show();
 
@@ -251,10 +245,9 @@ public class MainActivity extends AppCompatActivity
                 Log.d(TAG, "onConnectionInfoAvailable:Server THREAD STARTED");
             } else {
                 Log.d(TAG, "onConnectionInfoAvailable: REQUESTING GROUP INFO");
-                wManager.requestGroupInfo(wChannel,groupInfoListener);
                 Log.d(TAG, "onConnectionInfoAvailable: YOU ARE THE CLIENT");
                 Toast.makeText(MainActivity.this, "YOU ARE THE CLIENT", Toast.LENGTH_SHORT).show();
-
+                Log.d(TAG, "onConnectionInfoAvailable: GROUP OWNDER ADDRESS: " + groupOwnerAddress);
                 client = new ClientSideThread(groupOwnerAddress, handler, MainActivity.this);
                 Log.d(TAG, "onConnectionInfoAvailable:Client THREAD CREATED!!!");
                 client.start();
@@ -282,7 +275,6 @@ public class MainActivity extends AppCompatActivity
             public void onSuccess() {
                 Log.d(TAG, "Connected to device: " + device.deviceName);
                 Log.d(TAG, "onSuccess: CONNECTED TO DEVICE: " + device);
-                connectedDeviceLiveData.postValue(device);
             }
 
             @Override
@@ -317,8 +309,8 @@ public class MainActivity extends AppCompatActivity
                         Log.d(TAG, "handleMessage: FAILED TO DESERIALIZE MSG");
                     }
 
-                    Log.d(TAG, "handleMessage: DESERIALIZED MSG: " + msg);
                     if(msg != null){
+                        Log.d(TAG, "handleMessage: DESERIALIZED MSG: " + msg);
 
                     }
                     Toast.makeText(MainActivity.this, "Message read: " + tempMsg, Toast.LENGTH_SHORT).show();
@@ -341,18 +333,19 @@ public class MainActivity extends AppCompatActivity
 //    }
 
 
-    WifiP2pManager.GroupInfoListener groupInfoListener = new WifiP2pManager.GroupInfoListener() {
-        @Override
-        public void onGroupInfoAvailable(WifiP2pGroup wifiP2pGroup) {
-            Log.d(TAG, "onGroupInfoAvailable: SHEMOVEDI AQANE");
-            if(wifiP2pGroup != null) {
-                Log.d(TAG, "onGroupInfoAvailable: wifiP2pGroupList: " + wifiP2pGroup.getClientList());
-                if(wifiP2pGroup.getClientList().size() > 0){
-                    connectedDeviceLiveData.postValue(wifiP2pGroup.getClientList().iterator().next());
-                }
-            }
-        }
-    };
+//    WifiP2pManager.GroupInfoListener groupInfoListener = new WifiP2pManager.GroupInfoListener() {
+//        @Override
+//        public void onGroupInfoAvailable(WifiP2pGroup wifiP2pGroup) {
+//            Log.d(TAG, "onGroupInfoAvailable: SHEMOVEDI AQANE");
+//            if(wifiP2pGroup != null) {
+//                Log.d(TAG, "onGroupInfoAvailable: wifip2pgroupowner:" + wifiP2pGroup.getOwner());
+//                Log.d(TAG, "onGroupInfoAvailable: wifiP2pGroupList: " + wifiP2pGroup.getClientList());
+//                if(wifiP2pGroup.getClientList().size() > 0){
+//                    connectedDeviceLiveData.postValue(wifiP2pGroup.getClientList().iterator().next());
+//                }
+//            }
+//        }
+//    };
 
     private void startApp() {
 //        WifiManager wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
@@ -362,7 +355,7 @@ public class MainActivity extends AppCompatActivity
 
         wManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         wChannel = wManager.initialize(this, getMainLooper(), null);
-        wReceiver = new WifiBroadcastReceiver(wChannel, wManager, peerListListener, connectionInfoListener);
+        wReceiver = new WifiBroadcastReceiver(wChannel, wManager, peerListListener,connectionInfoListener);
 
         wFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
         wFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
@@ -398,7 +391,6 @@ public class MainActivity extends AppCompatActivity
                         .setAction("Action", null).show();
 
                 discoverPeers();
-
             }
         });
         DrawerLayout drawer = findViewById(R.id.drawer_layout);

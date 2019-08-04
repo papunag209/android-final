@@ -10,8 +10,6 @@ public interface P2pController {
 
         LiveData<Collection<WifiP2pDevice>> getPeerLiveData();
 
-        LiveData<WifiP2pDevice> getConnectedDeviceLiveData();
-
         void setConnectedDevice(WifiP2pDevice connectedDevice);
 
         void connectToDevice(WifiP2pDevice device);
