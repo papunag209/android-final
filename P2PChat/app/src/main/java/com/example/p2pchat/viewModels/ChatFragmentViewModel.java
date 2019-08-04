@@ -44,8 +44,10 @@ public class ChatFragmentViewModel extends ViewModel {
         sessionLiveData.observe(lifecycleOwner, new Observer<Session>() {
             @Override
             public void onChanged(Session session) {
-                sessionId = session.getSessionId();
-                messagesListLiveData = dao.getMessages(sessionId);
+                if(session!=null){
+                    sessionId = session.getSessionId();
+                    messagesListLiveData = dao.getMessages(sessionId);
+                }
             }
         });
     }
@@ -64,6 +66,7 @@ public class ChatFragmentViewModel extends ViewModel {
         messageToSend.setMessageTime(Calendar.getInstance().getTime().toString());
 //        messageToSend.setMessageId(sessionLiveData.getValue().getSessionId());
         messageToSend.setSessionId(sessionId);
+        messageToSend.setMessageStatus("PENDING");
 //        Log.d(TAG, "sendMessage: session data: " + sessionLiveData.getValue());
 //        Log.d(TAG, "sendMessage: message data:" + messagesListLiveData.getValue());
         Completable insertDone = dao.insertMessageAsync(messageToSend);

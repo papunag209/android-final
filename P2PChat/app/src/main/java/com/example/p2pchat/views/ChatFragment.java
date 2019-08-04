@@ -93,7 +93,7 @@ public class ChatFragment extends Fragment {
         String peerMac = getArguments().getString("PeerMac");
         if (sessionId != null) {
             chatFragmentViewModel.init(sessionId);
-        } if (peerMac != null){
+        } else if (peerMac != null){
             chatFragmentViewModel.init(peerMac, this);
         } else {
             Log.d(TAG, "onViewCreated: No Session Id and Mac Given To Fragment");

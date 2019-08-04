@@ -10,6 +10,7 @@ import androidx.room.Update;
 
 import com.example.p2pchat.data.model.Message;
 import com.example.p2pchat.data.model.Session;
+import com.example.p2pchat.data.model.helperModel.MessageWithMacAddress;
 import com.example.p2pchat.data.model.helperModel.SessionWithMessageCount;
 
 import java.util.List;
@@ -29,7 +30,7 @@ public interface DataDao {
     @Query("select * from Session where SessionId = :id")
     Session getASession(Long id);
 
-    @Query("select * from Session where PeerMAC = :mac")
+    @Query("select * from Session where peerMac = :mac")
     LiveData<Session> getSessionByMac(String mac);
 
     @Insert
@@ -54,10 +55,12 @@ public interface DataDao {
     @Query("select *, count(*) as messageCount from session s, message m where s.SessionId = m.SessionId group by m.SessionId")
     LiveData<List<SessionWithMessageCount>> getSessionListWithMessageCount();
 
-
     //Message methods
     @Query("select * from Message where SessionId = :sessionId")
     LiveData<List<Message>> getMessages(Long sessionId);
+
+    @Query("select * from Message m, Session s where m.SessionId = s.SessionId and m.MessageStatus='PENDING'")
+    LiveData<List<MessageWithMacAddress>> getPendingMessages();
 
     @Insert
     Long insertMessage(Message message);

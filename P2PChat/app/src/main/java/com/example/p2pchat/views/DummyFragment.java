@@ -21,6 +21,7 @@ import com.example.p2pchat.data.DataDao;
 import com.example.p2pchat.data.Database;
 import com.example.p2pchat.data.model.Message;
 import com.example.p2pchat.data.model.Session;
+import com.example.p2pchat.data.model.helperModel.MessageWithMacAddress;
 
 import java.util.Calendar;
 import java.util.List;
@@ -80,12 +81,20 @@ public class DummyFragment extends Fragment {
 
     void populateDb(int numHistoryItems){
         DataDao dao = Database.getInstance().dataDao();
+
+        dao.getPendingMessages().observe(this, new Observer<List<MessageWithMacAddress>>() {
+            @Override
+            public void onChanged(List<MessageWithMacAddress> messageWithMacAddresses) {
+                Log.d(TAG, "onChanged: pending messages: " + messageWithMacAddresses);
+            }
+        });
+
         Log.d(TAG, "populateDb: populated");
 
         //populate sessions
         Session s = new Session();
         s.setPeerPhoneName("123");
-        s.setPeerMAC("456");
+        s.setPeerMac("389");
         s.setSessionStartTime(Calendar.getInstance().getTime().toString());
         Long sessionId = dao.insertSession(s);
         s = new Session();
