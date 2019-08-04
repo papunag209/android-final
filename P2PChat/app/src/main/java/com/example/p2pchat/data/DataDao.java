@@ -66,7 +66,7 @@ public interface DataDao {
     Long insertMessage(Message message);
 
     @Update
-    void updateMessage(Message message);
+    Completable updateMessage(Message message);
 
     @Query("delete from Message")
     void clearMessages();

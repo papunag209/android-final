@@ -26,6 +26,7 @@ import com.example.p2pchat.data.model.helperModel.MessageWithMacAddress;
 import java.util.Calendar;
 import java.util.List;
 
+import io.reactivex.CompletableObserver;
 import io.reactivex.Single;
 import io.reactivex.SingleObserver;
 import io.reactivex.disposables.Disposable;
@@ -94,7 +95,7 @@ public class DummyFragment extends Fragment {
         //populate sessions
         Session s = new Session();
         s.setPeerPhoneName("123");
-        s.setPeerMac("389");
+        s.setPeerMac("3c:45:1f");
         s.setSessionStartTime(Calendar.getInstance().getTime().toString());
         Long sessionId = dao.insertSession(s);
         s = new Session();
@@ -143,6 +144,23 @@ public class DummyFragment extends Fragment {
             @Override
             public void onChanged(List<Message> messages) {
                 Log.d(TAG, "onChanged: messages: " + messages);
+            }
+        });
+        m.setMessageStatus("SENT");
+        dao.updateMessage(m).subscribe(new CompletableObserver() {
+            @Override
+            public void onSubscribe(Disposable d) {
+
+            }
+
+            @Override
+            public void onComplete() {
+                Log.d(TAG, "onComplete: message successfully updated: YEI");
+            }
+
+            @Override
+            public void onError(Throwable e) {
+
             }
         });
     }
