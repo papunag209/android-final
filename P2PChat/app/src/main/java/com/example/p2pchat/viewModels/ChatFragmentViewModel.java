@@ -32,6 +32,7 @@ public class ChatFragmentViewModel extends ViewModel {
 
     public void init(Long sessionId) {
         this.sessionId = sessionId;
+        Log.d(TAG, "init with ID: ");
         dao = Database.getInstance().dataDao();
         sessionLiveData = dao.getSessionById(sessionId);
         messagesListLiveData = dao.getMessages(sessionId);
@@ -40,16 +41,22 @@ public class ChatFragmentViewModel extends ViewModel {
     public void init(String peerMac, LifecycleOwner lifecycleOwner) {
 //        this.sessionId = sessionId;
         dao = Database.getInstance().dataDao();
-        sessionLiveData = dao.getSessionByMac(peerMac);
-        sessionLiveData.observe(lifecycleOwner, new Observer<Session>() {
-            @Override
-            public void onChanged(Session session) {
-                if(session!=null){
-                    sessionId = session.getSessionId();
-                    messagesListLiveData = dao.getMessages(sessionId);
-                }
-            }
-        });
+        Session session = dao.getSessionByMacSync(peerMac);
+        Log.d(TAG, "init with MAC: session got from db is: " + session);
+        this.sessionId = session.getSessionId();
+        sessionLiveData = dao.getSessionById(sessionId);
+        messagesListLiveData = dao.getMessages(sessionId);
+//        sessionLiveData = dao.getSessionByMac(peerMac);
+//        sessionLiveData.observe(lifecycleOwner, new Observer<Session>() {
+//            @Override
+//            public void onChanged(Session session) {
+//                Log.d(TAG, "onChanged: session is: " + session);
+//                if(session!=null){
+//                    sessionId = session.getSessionId();
+//                    messagesListLiveData = dao.getMessages(sessionId);
+//                }
+//            }
+//        });
     }
 
     public LiveData<List<Message>> getMessages() {
@@ -69,6 +76,7 @@ public class ChatFragmentViewModel extends ViewModel {
         messageToSend.setMessageStatus("PENDING");
 //        Log.d(TAG, "sendMessage: session data: " + sessionLiveData.getValue());
 //        Log.d(TAG, "sendMessage: message data:" + messagesListLiveData.getValue());
+        Log.d(TAG, "sendMessage: session is:" + sessionLiveData.getValue() + " message to send is: " + messageToSend );
         Completable insertDone = dao.insertMessageAsync(messageToSend);
         insertDone.subscribe(new CompletableObserver() {
             @Override

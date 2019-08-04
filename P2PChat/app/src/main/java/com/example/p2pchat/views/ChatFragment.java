@@ -91,12 +91,13 @@ public class ChatFragment extends Fragment {
 
         Long sessionId = getArguments().getLong("SessionId");
         String peerMac = getArguments().getString("PeerMac");
-        if (sessionId != null) {
-            chatFragmentViewModel.init(sessionId);
-        } else if (peerMac != null){
+        Log.d(TAG, "onViewCreated: arguments: " + getArguments());
+        Log.d(TAG, "onViewCreated: SESSION ID ARIS: " + sessionId);
+        Log.d(TAG, "onViewCreated: peerMac: " + peerMac);
+        if (peerMac != null){
             chatFragmentViewModel.init(peerMac, this);
         } else {
-            Log.d(TAG, "onViewCreated: No Session Id and Mac Given To Fragment");
+            chatFragmentViewModel.init(sessionId);
         }
         initOnClickListeners();
         initDataObservers();
@@ -138,8 +139,9 @@ public class ChatFragment extends Fragment {
             public void onChanged(Session session) {
                 Log.d(TAG, "onChanged: session changed to: " + session);
                 if (session == null) {
-                    navController.navigateUp();
+//                    navController.navigateUp();
                 }
+
             }
         });
         LiveData<SessionWithMessageCount> s;

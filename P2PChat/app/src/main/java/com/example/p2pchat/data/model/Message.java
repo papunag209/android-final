@@ -68,6 +68,6 @@ public class Message implements Serializable {
 
     @Override
     public String toString() {
-        return this.getMessageText() + "|" + this.getMessageId() + "|" + this.getMessageTime() + '|' + getSessionId();
+        return this.getMessageText() + "|" + this.getMessageId() + "|" + this.getMessageTime() + '|' + getSessionId() + '|' + getMessageStatus();
     }
 }

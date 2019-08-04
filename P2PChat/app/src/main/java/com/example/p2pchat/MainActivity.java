@@ -16,7 +16,9 @@ import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 
+import com.example.p2pchat.data.DataDao;
 import com.example.p2pchat.data.Database;
+import com.example.p2pchat.data.model.Session;
 import com.example.p2pchat.data.model.helperModel.MessageWithMacAddress;
 import com.example.p2pchat.interfaces.P2pController;
 import com.example.p2pchat.receivers.WifiBroadcastReceiver;
@@ -65,6 +67,9 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import io.reactivex.CompletableObserver;
+import io.reactivex.disposables.Disposable;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, P2pController {
@@ -311,7 +316,31 @@ public class MainActivity extends AppCompatActivity
 
                     if(msg != null){
                         Log.d(TAG, "handleMessage: DESERIALIZED MSG: " + msg);
+                        //TODO MODIFY INSERT
+                        DataDao dao = Database.getInstance().dataDao();
+                        Session session = dao.getSessionByMacSync(connectedDevice.deviceAddress);
+                        final com.example.p2pchat.data.model.Message m = new com.example.p2pchat.data.model.Message();
+                        m.setMessageStatus("RECEIVED");
+                        m.setSessionId(session.getSessionId());
+                        m.setMessageText(msg.getMessageText());
+                        m.setMessageTime(msg.getMessageTime());
+                        final MessageWithMacAddress finalMsg = msg;
+                        dao.insertMessageAsync(m).subscribe(new CompletableObserver() {
+                            @Override
+                            public void onSubscribe(Disposable d) {
 
+                            }
+
+                            @Override
+                            public void onComplete() {
+                                Log.d(TAG, "onComplete: message inserted: " + m + "received message: " + finalMsg);
+                            }
+
+                            @Override
+                            public void onError(Throwable e) {
+
+                            }
+                        });
                     }
                     Toast.makeText(MainActivity.this, "Message read: " + tempMsg, Toast.LENGTH_SHORT).show();
                     break;
@@ -367,12 +396,30 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onChanged(List<MessageWithMacAddress> messageWithMacAddresses) {
                 Log.d(TAG, "onChanged: GOT PENDING MSG LIST:" + messageWithMacAddresses);
-                for(MessageWithMacAddress msg : messageWithMacAddresses){
+                for(final MessageWithMacAddress msg : messageWithMacAddresses){
 //                    Log.d(TAG, "onChanged: msg:" + msg);
 //                    Log.d(TAG, "onChanged: msg.peermac:" + msg.getPeerMac());
 //                    if(connectedDevice != null && msg != null && msg.getPeerMac().equals(connectedDevice.deviceAddress)){
+                    Log.d(TAG, "onChanged: msg mac is:" + msg.getPeerMac());
                     if(connectedDevice != null) {
-                        sendPendingMessage(msg);
+                        msg.setMessageStatus("SENT");
+                        Database.getInstance().dataDao().updateMessage(msg).subscribe(new CompletableObserver() {
+                            @Override
+                            public void onSubscribe(Disposable d) {
+                                
+                            }
+
+                            @Override
+                            public void onComplete() {
+                                Log.d(TAG, "onComplete: message updated now sending");
+                                sendPendingMessage(msg);
+                            }
+
+                            @Override
+                            public void onError(Throwable e) {
+
+                            }
+                        });
                     }
 //                    }
                 }
