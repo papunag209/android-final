@@ -30,6 +30,9 @@ public interface DataDao {
     @Query("select * from Session where SessionId = :id")
     Session getASession(Long id);
 
+    @Query("select * from Session where PeerMAC = :mac")
+    LiveData<Session> getSessionByMac(String mac);
+
     @Insert
     Long insertSession(Session session);
 
