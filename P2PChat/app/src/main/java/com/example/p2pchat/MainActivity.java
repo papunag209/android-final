@@ -28,6 +28,7 @@ import com.example.p2pchat.receivers.WifiBroadcastReceiver;
 import com.example.p2pchat.threads.ClientSideThread;
 import com.example.p2pchat.threads.SendAndReceive;
 import com.example.p2pchat.threads.ServerSideThread;
+import com.example.p2pchat.views.ChatFragment;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -73,6 +74,7 @@ import java.util.List;
 
 import io.reactivex.CompletableObserver;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Function;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, P2pController, BroadcastController {
@@ -102,6 +104,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private static String myMacAddress;
+    private int myDeviceStatus;
 
     ServerSideThread server;
 
@@ -191,18 +194,25 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public void removeConnection() {
+    public void removeConnection(final ChatFragment.ConnectionListener listener) {
         if(wManager != null && wChannel != null) {
             wManager.removeGroup(wChannel, new WifiP2pManager.ActionListener() {
                 @Override
                 public void onSuccess() {
                     closeSockets();
                     Log.d(TAG, "onSuccess: DETACHED FROM PEER");
+                    if(listener!=null) {
+                        listener.onDisconnect();
+                    }
                 }
 
                 @Override
+
                 public void onFailure(int i) {
                     Log.d(TAG, "onFailure: FAILED TO DETACH FROM PEER");
+                    if(listener!=null) {
+                        listener.onDisconnect();
+                    }
                 }
             });
         }
@@ -292,6 +302,11 @@ public class MainActivity extends AppCompatActivity
                 Log.d(TAG, "Failed to connect to device: " + device.deviceName);
             }
         });
+    }
+
+    @Override
+    public int getDeviceStatus() {
+        return myDeviceStatus;
     }
 
     public static final int MESSAGE_READ = 5;
@@ -396,7 +411,7 @@ public class MainActivity extends AppCompatActivity
         wFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
         wFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         wFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
-        removeConnection();
+        removeConnection(null);
 //        testSerialization();
         Database.getInstance().dataDao().getPendingMessages().observe(this, new Observer<List<MessageWithMacAddress>>() {
             @Override
@@ -635,6 +650,14 @@ public class MainActivity extends AppCompatActivity
     public void updateOurDevice(int status) {
         //TODO UPDATED STATUS FOR OUR DEVICE
         Log.d(TAG, "updateOurDevice: device status updated:" + getDeviceStatus(status));
+        myDeviceStatus = status;
+        if(status != WifiP2pDevice.CONNECTED){
+            Log.d(TAG, "updateOurDevice: came in here"  + getDeviceStatus(status));
+            if (navController.getCurrentDestination().getId() == R.id.chatFragment){
+                Log.d(TAG, "updateOurDevice: tyvnai kargisai");
+                navController.navigateUp();
+            }
+        }
     }
 
     @Override

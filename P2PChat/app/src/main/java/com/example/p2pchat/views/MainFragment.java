@@ -79,7 +79,7 @@ public class MainFragment extends Fragment {
                     Log.d(TAG, "onClick: SENDING MESSAGE");
                     sendAndReceive.write("HELLO".getBytes());
                 } else {
-                    ((MainActivity) getActivity()).removeConnection();
+                    ((MainActivity) getActivity()).removeConnection(null);
                 }
             }
         });
@@ -101,8 +101,10 @@ public class MainFragment extends Fragment {
                 ArrayList<PeerStatusHolder> peerStatuses = new ArrayList<PeerStatusHolder>();
                 for (WifiP2pDevice device : s) {
                     peerStatuses.add(new PeerStatusHolder(device.deviceName, getDeviceStatus(device.status)));
-                    if(device.status == WifiP2pDevice.CONNECTED){
-                        Log.d(TAG, "onChanged: AMASTAN VART DAQONEQTEBULI " + device);
+
+                    Log.d(TAG, "onChanged: DEVICE STATUS IS: "  +device.status);
+                    if(device.status == WifiP2pDevice.CONNECTED && p2pController.getDeviceStatus() == WifiP2pDevice.CONNECTED){
+                        Log.d(TAG, "onChanged: DEVICE IS CONNECTED");
                         registerSessionForDevice(device);
                     }
                 }
@@ -159,6 +161,7 @@ public class MainFragment extends Fragment {
                 public void onError(Throwable e) {
                     Log.d(TAG, "onError: REGISTER FAILED");
                     Bundle args = new Bundle();
+                    Log.d(TAG, "onError: ah shit here we go again" + device.status);
                     args.putString("PeerMac", device.deviceAddress);
                     navController.navigate(R.id.chatFragment, args);
                 }

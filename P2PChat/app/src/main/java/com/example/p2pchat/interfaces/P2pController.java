@@ -14,4 +14,7 @@ public interface P2pController {
 
         void connectToDevice(WifiP2pDevice device);
 
+        int getDeviceStatus();
+
+
 }
