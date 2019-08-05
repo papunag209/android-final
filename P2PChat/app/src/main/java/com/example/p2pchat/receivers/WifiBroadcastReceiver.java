@@ -14,6 +14,7 @@ import android.util.Log;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.p2pchat.MainActivity;
+import com.example.p2pchat.interfaces.BroadcastController;
 
 import static com.example.p2pchat.MainActivity.getDeviceStatus;
 
@@ -23,12 +24,14 @@ public class WifiBroadcastReceiver extends BroadcastReceiver {
     private WifiP2pManager wManager;
     private WifiP2pManager.ConnectionInfoListener connectionInfoListener;
     private WifiP2pManager.PeerListListener peerListListener;
+    private BroadcastController broadcastController;
 
-    public WifiBroadcastReceiver(WifiP2pManager.Channel wChannel, WifiP2pManager wManager, WifiP2pManager.PeerListListener peerListListener, WifiP2pManager.ConnectionInfoListener connectionInfoListener) {
-        this.wChannel = wChannel;
-        this.wManager = wManager;
-        this.peerListListener = peerListListener;
-        this.connectionInfoListener = connectionInfoListener;
+    public WifiBroadcastReceiver(BroadcastController broadcastController) {
+        this.broadcastController = broadcastController;
+        this.wChannel = broadcastController.getChannel();
+        this.wManager = broadcastController.getManager();
+        this.peerListListener = broadcastController.getPeerListListener();
+        this.connectionInfoListener = broadcastController.getConnectionInfoListener();
     }
 
     @Override
@@ -61,14 +64,14 @@ public class WifiBroadcastReceiver extends BroadcastReceiver {
 
 
         } else if (msg.equals(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION)) {
-//            WifiP2pDevice device = intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_DEVICE);
-//            if (device == null) {
-//                Log.d(TAG, "onReceive: Device is null");
-//            } else {
-//                if(device.status == WifiP2pDevice.CONNECTED){
-//                    Log.d(TAG, "boradcastReceiver onReceive: DEVICE IS " + device);
-//                }
-//            }
+            WifiP2pDevice device = intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_DEVICE);
+            if (device == null) {
+                Log.d(TAG, "onReceive: Device is null");
+            } else {
+                Log.d(TAG, "boradcastReceiver onReceive: DEVICE IS " + device);
+                broadcastController.updateOurDevice(device.status);
+
+            }
         }
     }
 }
