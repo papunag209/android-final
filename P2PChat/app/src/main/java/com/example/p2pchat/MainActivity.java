@@ -21,6 +21,7 @@ import com.example.p2pchat.data.DataDao;
 import com.example.p2pchat.data.Database;
 import com.example.p2pchat.data.model.Session;
 import com.example.p2pchat.data.model.helperModel.MessageWithMacAddress;
+import com.example.p2pchat.interfaces.BroadcastController;
 import com.example.p2pchat.interfaces.P2pController;
 import com.example.p2pchat.receivers.WifiBroadcastReceiver;
 import com.example.p2pchat.threads.ClientSideThread;
@@ -73,7 +74,7 @@ import io.reactivex.CompletableObserver;
 import io.reactivex.disposables.Disposable;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, P2pController {
+        implements NavigationView.OnNavigationItemSelectedListener, P2pController, BroadcastController {
     private static final String TAG = "MainActivity";
     NavController navController;
     WifiP2pManager wManager;
@@ -388,7 +389,7 @@ public class MainActivity extends AppCompatActivity
 
         wManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
         wChannel = wManager.initialize(this, getMainLooper(), null);
-        wReceiver = new WifiBroadcastReceiver(wChannel, wManager, peerListListener,connectionInfoListener);
+        wReceiver = new WifiBroadcastReceiver(this);
 
         wFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
         wFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
@@ -627,5 +628,31 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    public void updateOurDevice(int status) {
+        //TODO UPDATED STATUS FOR OUR DEVICE
+        Log.d(TAG, "updateOurDevice: device status updated:" + getDeviceStatus(status));
+    }
+
+    @Override
+    public WifiP2pManager getManager() {
+        return wManager;
+    }
+
+    @Override
+    public WifiP2pManager.Channel getChannel() {
+        return wChannel;
+    }
+
+    @Override
+    public WifiP2pManager.ConnectionInfoListener getConnectionInfoListener() {
+        return connectionInfoListener;
+    }
+
+    @Override
+    public WifiP2pManager.PeerListListener getPeerListListener() {
+        return peerListListener;
     }
 }
