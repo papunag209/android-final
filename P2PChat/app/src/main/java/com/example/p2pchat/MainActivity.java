@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
@@ -97,6 +98,8 @@ public class MainActivity extends AppCompatActivity
     public void setServer(ServerSideThread server) {
         this.server = server;
     }
+
+    private static String myMacAddress;
 
     ServerSideThread server;
 
@@ -377,9 +380,10 @@ public class MainActivity extends AppCompatActivity
 //    };
 
     private void startApp() {
-//        WifiManager wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-//        wifiManager.setWifiEnabled(true);
-//        wifiManager.setWifiEnabled(false);
+        WifiManager wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        //TODO CHECK WIFI
+        assert wifiManager != null;
+        myMacAddress = wifiManager.getConnectionInfo().getMacAddress();
 
 
         wManager = (WifiP2pManager) getSystemService(Context.WIFI_P2P_SERVICE);
@@ -399,29 +403,29 @@ public class MainActivity extends AppCompatActivity
                 for(final MessageWithMacAddress msg : messageWithMacAddresses){
 //                    Log.d(TAG, "onChanged: msg:" + msg);
 //                    Log.d(TAG, "onChanged: msg.peermac:" + msg.getPeerMac());
-//                    if(connectedDevice != null && msg != null && msg.getPeerMac().equals(connectedDevice.deviceAddress)){
-                    Log.d(TAG, "onChanged: msg mac is:" + msg.getPeerMac());
-                    if(connectedDevice != null) {
-                        msg.setMessageStatus("SENT");
-                        Database.getInstance().dataDao().updateMessage(msg).subscribe(new CompletableObserver() {
-                            @Override
-                            public void onSubscribe(Disposable d) {
-                                
-                            }
+                    if(connectedDevice != null && msg != null && msg.getPeerMac().equals(connectedDevice.deviceAddress)){
+                        Log.d(TAG, "onChanged: msg mac is:" + msg.getPeerMac());
+                        if(connectedDevice != null) {
+                            msg.setMessageStatus("SENT");
+                            Database.getInstance().dataDao().updateMessage(msg).subscribe(new CompletableObserver() {
+                                @Override
+                                public void onSubscribe(Disposable d) {
 
-                            @Override
-                            public void onComplete() {
-                                Log.d(TAG, "onComplete: message updated now sending");
-                                sendPendingMessage(msg);
-                            }
+                                }
 
-                            @Override
-                            public void onError(Throwable e) {
+                                @Override
+                                public void onComplete() {
+                                    Log.d(TAG, "onComplete: message updated now sending");
+                                    sendPendingMessage(msg);
+                                }
 
-                            }
-                        });
+                                @Override
+                                public void onError(Throwable e) {
+
+                                }
+                            });
+                        }
                     }
-//                    }
                 }
 
             }
@@ -467,10 +471,11 @@ public class MainActivity extends AppCompatActivity
             Log.d(TAG, "sendPendingMessage: TRYING TO SEND MESSAGE: " + msg);
             byte[] msgBytes = SerializationUtils.serialize(msg);
             Log.d(TAG, "sendPendingMessage: serializedmsg: " + msgBytes);
+            msg.setPeerMac(myMacAddress);
             getSendAndReceive().write(msgBytes);
             Log.d(TAG, "sendPendingMessage: SENT MESSAGE!" + msg);
-            MessageWithMacAddress result = (MessageWithMacAddress) SerializationUtils.deserialize(msgBytes);
-            Log.d(TAG, "sendPendingMessage: DESERIALIZED MSG SHOUULD BE :" + result);
+//            MessageWithMacAddress result = (MessageWithMacAddress) SerializationUtils.deserialize(msgBytes);
+//            Log.d(TAG, "sendPendingMessage: DESERIALIZED MSG SHOUULD BE :" + result);
         }else{
             Log.d(TAG, "sendPendingMessage: SEND AND RECEIVE IS NULL!!!");
         }
