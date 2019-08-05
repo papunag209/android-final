@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.p2pchat.R;
 import com.example.p2pchat.data.model.Message;
+import com.example.p2pchat.data.model.MessageStatus;
 
 import java.util.List;
 
@@ -48,7 +49,10 @@ public class MessagesRecyclerViewAdapter extends RecyclerView.Adapter<MessagesRe
     //todo implement properly based on message status
     @Override
     public int getItemViewType(int position) {
-        return position%2;
+        if (messages.get(position).getMessageStatus() == MessageStatus.RECEIVED){
+            return 0;
+        }
+        return 1;
     }
 
     class ViewHolder extends RecyclerView.ViewHolder{

@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModel;
 import com.example.p2pchat.data.DataDao;
 import com.example.p2pchat.data.Database;
 import com.example.p2pchat.data.model.Message;
+import com.example.p2pchat.data.model.MessageStatus;
 import com.example.p2pchat.data.model.Session;
 
 import java.util.Calendar;
@@ -73,7 +74,7 @@ public class ChatFragmentViewModel extends ViewModel {
         messageToSend.setMessageTime(Calendar.getInstance().getTime().toString());
 //        messageToSend.setMessageId(sessionLiveData.getValue().getSessionId());
         messageToSend.setSessionId(sessionId);
-        messageToSend.setMessageStatus("PENDING");
+        messageToSend.setMessageStatus(MessageStatus.PENDING);
 //        Log.d(TAG, "sendMessage: session data: " + sessionLiveData.getValue());
 //        Log.d(TAG, "sendMessage: message data:" + messagesListLiveData.getValue());
         Log.d(TAG, "sendMessage: session is:" + sessionLiveData.getValue() + " message to send is: " + messageToSend );

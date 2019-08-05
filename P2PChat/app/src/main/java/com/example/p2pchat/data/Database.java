@@ -6,11 +6,10 @@ import androidx.room.RoomDatabase;
 
 import com.example.p2pchat.App;
 import com.example.p2pchat.data.model.Message;
-import com.example.p2pchat.data.model.MessageStatus;
 import com.example.p2pchat.data.model.Session;
 
 
-@androidx.room.Database(entities = {Message.class, MessageStatus.class, Session.class}, version = 1)
+@androidx.room.Database(entities = {Message.class, Session.class}, version = 1)
 public abstract class Database extends RoomDatabase {
 
     private static final String DATABASE_NAME = "app_database";

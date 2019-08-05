@@ -19,6 +19,7 @@ import android.os.Bundle;
 
 import com.example.p2pchat.data.DataDao;
 import com.example.p2pchat.data.Database;
+import com.example.p2pchat.data.model.MessageStatus;
 import com.example.p2pchat.data.model.Session;
 import com.example.p2pchat.data.model.helperModel.MessageWithMacAddress;
 import com.example.p2pchat.interfaces.BroadcastController;
@@ -324,7 +325,7 @@ public class MainActivity extends AppCompatActivity
                         DataDao dao = Database.getInstance().dataDao();
                         Session session = dao.getSessionByMacSync(connectedDevice.deviceAddress);
                         final com.example.p2pchat.data.model.Message m = new com.example.p2pchat.data.model.Message();
-                        m.setMessageStatus("RECEIVED");
+                        m.setMessageStatus(MessageStatus.RECEIVED);
                         m.setSessionId(session.getSessionId());
                         m.setMessageText(msg.getMessageText());
                         m.setMessageTime(msg.getMessageTime());
@@ -407,7 +408,7 @@ public class MainActivity extends AppCompatActivity
                     if(connectedDevice != null && msg != null && msg.getPeerMac().equals(connectedDevice.deviceAddress)){
                         Log.d(TAG, "onChanged: msg mac is:" + msg.getPeerMac());
                         if(connectedDevice != null) {
-                            msg.setMessageStatus("SENT");
+                            msg.setMessageStatus(MessageStatus.SENT);
                             Database.getInstance().dataDao().updateMessage(msg).subscribe(new CompletableObserver() {
                                 @Override
                                 public void onSubscribe(Disposable d) {

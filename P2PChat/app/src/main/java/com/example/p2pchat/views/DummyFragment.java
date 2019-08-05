@@ -142,7 +142,7 @@ public class DummyFragment extends Fragment {
 //        dao.insertMessage(m);
 //        m.setMessageTime(Calendar.getInstance().getTime().toString());
 //        m.setMessageText("aq var brat shen sada xar");
-//        m.setMessageStatus("PENDING");
+//        m.setMessageStatus(MessageStatus.PENDING);
 //        dao.insertMessage(m);
 //
 //        LiveData<List<Message>> messages = dao.getMessages(sessionId);
@@ -152,7 +152,7 @@ public class DummyFragment extends Fragment {
 //                Log.d(TAG, "onChanged: messages: " + messages);
 //            }
 //        });
-//        m.setMessageStatus("SENT");
+//        m.setMessageStatus();zzz
 //        dao.updateMessage(m).subscribe(new CompletableObserver() {
 //            @Override
 //            public void onSubscribe(Disposable d) {
