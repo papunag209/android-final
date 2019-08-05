@@ -34,7 +34,6 @@
             android:defaultValue="false" />
         <argument
             android:name="PeerMac"
-            app:argType="string"
-            android:defaultValue="null" />
+            app:argType="string" />
     </fragment>
 </navigation>

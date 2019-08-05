@@ -95,8 +95,10 @@ public class ChatFragment extends Fragment {
         Log.d(TAG, "onViewCreated: SESSION ID ARIS: " + sessionId);
         Log.d(TAG, "onViewCreated: peerMac: " + peerMac);
         if (peerMac != null){
+            Log.d(TAG, "onViewCreated: inside if: mac:" + peerMac);
             chatFragmentViewModel.init(peerMac, this);
         } else {
+            Log.d(TAG, "onViewCreated: inside if: ID:" + sessionId);
             chatFragmentViewModel.init(sessionId);
         }
         initOnClickListeners();
