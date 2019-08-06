@@ -44,8 +44,6 @@ public class MainFragment extends Fragment {
     RecyclerView recyclerView;
     NavController navController;
     MainFragmentViewModel mainFragmentViewModel;
-    PeersRecyclerViewAdapter recyclerViewAdapter;
-    WifiP2pDevice[] peerLst;
     Button btn;
     P2pController p2pController;
 
@@ -92,7 +90,6 @@ public class MainFragment extends Fragment {
         navController = Navigation.findNavController(this.getView());
         mainFragmentViewModel = ViewModelProviders.of(this).get(MainFragmentViewModel.class);
         //TODO CHECK ACTIVITY
-        mainFragmentViewModel.init(p2pController.getPeerLiveData());
 //        recyclerViewAdapter = (PeersRecyclerViewAdapter)recyclerView.getAdapter();
 //        mainFragmentViewModel.getCollectionLiveData().observe(this, new Observer<Collection<WifiP2pDevice>>() {
 //            @Override
@@ -114,20 +111,6 @@ public class MainFragment extends Fragment {
 //            }
 //        });
 
-
-        //TODO NEED TO GIVE PEER LIST HERE
-//        final PeersRecyclerViewAdapter adapter = new PeersRecyclerViewAdapter(null, new PeersRecyclerViewAdapter.OnRecycleItem() {
-//            @Override
-//            public void onClick(int position) {
-//                //GETTING CONNECTION
-//                final WifiP2pDevice device = adapter.get(position);
-//
-//                p2pController.connectToDevice(device);
-//
-//                Log.d(TAG, "onClick: " + position);
-//
-//            }
-//        });
         final PeersRecyclerViewAdapter adapter = new PeersRecyclerViewAdapter(null);
         adapter.setRecycleItem(new PeersRecyclerViewAdapter.OnRecycleItem() {
             @Override

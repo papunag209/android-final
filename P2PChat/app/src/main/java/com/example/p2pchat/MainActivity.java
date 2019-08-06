@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pConfig;
@@ -43,6 +44,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
@@ -65,6 +67,7 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.Menu;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import org.apache.commons.lang3.SerializationUtils;
@@ -122,21 +125,11 @@ public class MainActivity extends AppCompatActivity
         @Override
         public void onPeersAvailable(WifiP2pDeviceList wifiP2pDeviceList) {
 
-            /*
-                status list:
-                public static final int AVAILABLE = 3;
-                public static final int CONNECTED = 0;
-                public static final int FAILED = 2;
-                public static final int INVITED = 1;
-                public static final int UNAVAILABLE = 4;
-             */
 
             Log.d(TAG, "onPeersAvailable: " + wifiP2pDeviceList.getDeviceList());
             peers.postValue(wifiP2pDeviceList.getDeviceList());
 
 
-            //TODO DISPLAY DATA WITH ADAPTER
-//                    PeersRecyclerViewAdapter adapter = new PeersRecyclerViewAdapter(peerNames);
         }
     };
     ;
@@ -373,32 +366,8 @@ public class MainActivity extends AppCompatActivity
             return true;
         }
     });
-//
-//    private void testSerialization(){
-//        MessageWithMacAddress testmsg = new MessageWithMacAddress();
-//        testmsg.setMessageId(1L);
-//        testmsg.setSessionId(10L);
-//        testmsg.setMessageTime("THIS IS TIME");
-//        testmsg.setMessageStatus("STATUSI");
-//        testmsg.setMessageText("MESSAGE TEXT");
-//        testmsg.setPeerMac("PEERIS MAC ADRESI");
-//        sendPendingMessage(testmsg);
-//    }
 
 
-//    WifiP2pManager.GroupInfoListener groupInfoListener = new WifiP2pManager.GroupInfoListener() {
-//        @Override
-//        public void onGroupInfoAvailable(WifiP2pGroup wifiP2pGroup) {
-//            Log.d(TAG, "onGroupInfoAvailable: SHEMOVEDI AQANE");
-//            if(wifiP2pGroup != null) {
-//                Log.d(TAG, "onGroupInfoAvailable: wifip2pgroupowner:" + wifiP2pGroup.getOwner());
-//                Log.d(TAG, "onGroupInfoAvailable: wifiP2pGroupList: " + wifiP2pGroup.getClientList());
-//                if(wifiP2pGroup.getClientList().size() > 0){
-//                    connectedDeviceLiveData.postValue(wifiP2pGroup.getClientList().iterator().next());
-//                }
-//            }
-//        }
-//    };
 
     private void startApp() {
         WifiManager wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
@@ -423,8 +392,14 @@ public class MainActivity extends AppCompatActivity
             public void onChanged(Collection<WifiP2pDevice> wifiP2pDevices) {
                 Log.d(TAG, "onChanged: SOMETHING CHANGED!!!");
                 if(wifiP2pDevices == null || wifiP2pDevices.size() ==0){
-
+//                    ProgressBar bar = findViewById(R.id.progressBar);
+//                    bar.setVisibility(View.VISIBLE);
                 }else {
+
+//                    ProgressBar bar = findViewById(R.id.progressBar);
+//                    bar.setVisibility(View.GONE);
+
+
                     ArrayList<WifiP2pDevice> peerList = new ArrayList<WifiP2pDevice>();
                     for (WifiP2pDevice device : wifiP2pDevices) {
                         peerList.add(device);
@@ -460,7 +435,6 @@ public class MainActivity extends AppCompatActivity
                                 public void onSubscribe(Disposable d) {
 
                                 }
-
                                 @Override
                                 public void onComplete() {
                                     Log.d(TAG, "onComplete: message updated now sending");
@@ -475,7 +449,6 @@ public class MainActivity extends AppCompatActivity
                         }
                     }
                 }
-
             }
         });
 
