@@ -464,17 +464,7 @@ public class MainActivity extends AppCompatActivity
         final Toolbar toolbar = findViewById(R.id.toolbar);
         this.toolbar = toolbar;
         setSupportActionBar(toolbar);
-//        toolbar.setVisibility(View.GONE);
-//        FloatingActionButton fab = findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//
-//                discoverPeers();
-//            }
-//        });
+
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -729,10 +719,9 @@ public class MainActivity extends AppCompatActivity
             } else {
                 navController.navigate(R.id.mainFragment);
             }
+            toolbar.setTitle("Peers");
         } else if (id == R.id.nav_history) {
             navController.navigate(R.id.historyFragment);
-        } else if (id == R.id.nav_debug) {
-            navController.navigate(R.id.dummyFragment);
         }
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
