@@ -52,7 +52,7 @@ public class MessagesRecyclerViewAdapter extends RecyclerView.Adapter<MessagesRe
         notifyDataSetChanged();
     }
 
-    //todo implement properly based on message status
+    //todo implement properly based on message status   
     @Override
     public int getItemViewType(int position) {
         String messageStatus = messages.get(position).getMessageStatus();

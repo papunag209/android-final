@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
 
 import androidx.appcompat.widget.Toolbar;
 
@@ -51,6 +52,7 @@ public class ChatFragment extends Fragment {
     EditText messageText;
     ImageButton backButton;
     ImageButton deleteButton;
+    TextView phoneName;
     NavController navController;
 
     public ChatFragment() {
@@ -75,7 +77,7 @@ public class ChatFragment extends Fragment {
         messageText = view.findViewById(R.id.editText_messageInput);
         backButton = view.findViewById(R.id.imageButton_chatBack);
         deleteButton = view.findViewById(R.id.imageButton_deleteThisMessage);
-
+        phoneName = view.findViewById(R.id.textView_peerName);
 
         Boolean isHistoryMode = getArguments().getBoolean("HistoryMode");
         if (isHistoryMode) {
@@ -182,6 +184,7 @@ public class ChatFragment extends Fragment {
         s.observe(this, new Observer<SessionWithMessageCount>() {
             @Override
             public void onChanged(SessionWithMessageCount sessionWithMessageCount) {
+                phoneName.setText(sessionWithMessageCount.getPeerPhoneName());
                 Log.d(TAG, "onChanged: session with message count: " + sessionWithMessageCount);
             }
         });
