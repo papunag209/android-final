@@ -197,6 +197,7 @@ public class MainActivity extends AppCompatActivity
                 public void onSuccess() {
                     closeSockets();
                     Log.d(TAG, "onSuccess: DETACHED FROM PEER");
+                    Toast.makeText(MainActivity.this, "Disconnected", Toast.LENGTH_SHORT).show();
                     if(listener!=null) {
                         listener.onDisconnect();
                     }
@@ -428,6 +429,9 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onChanged(List<MessageWithMacAddress> messageWithMacAddresses) {
                 Log.d(TAG, "onChanged: GOT PENDING MSG LIST:" + messageWithMacAddresses);
+                if(connectedDevice == null ) {
+                    removeConnection(null);
+                }
                 for(final MessageWithMacAddress msg : messageWithMacAddresses){
 //                    Log.d(TAG, "onChanged: msg:" + msg);
 //                    Log.d(TAG, "onChanged: msg.peermac:" + msg.getPeerMac());
@@ -461,16 +465,16 @@ public class MainActivity extends AppCompatActivity
         this.toolbar = toolbar;
         setSupportActionBar(toolbar);
 //        toolbar.setVisibility(View.GONE);
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-
-                discoverPeers();
-            }
-        });
+//        FloatingActionButton fab = findViewById(R.id.fab);
+//        fab.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+//                        .setAction("Action", null).show();
+//
+//                discoverPeers();
+//            }
+//        });
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         NavigationView navigationView = findViewById(R.id.nav_view);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(

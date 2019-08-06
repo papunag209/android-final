@@ -11,6 +11,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -99,8 +100,13 @@ public class MainFragment extends Fragment {
             }
         });
 
+        RecyclerView.LayoutManager layoutManager =new LinearLayoutManager(App.getContext());
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(),
+                ((LinearLayoutManager) layoutManager).getOrientation());
+        recyclerView.addItemDecoration(dividerItemDecoration);
+
         recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(App.getContext()));
+        recyclerView.setLayoutManager(layoutManager);
         p2pController.setRecyclerView(recyclerView);
 
         Log.d(TAG, "onViewCreated: ACTIVITY" + getActivity());

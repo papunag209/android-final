@@ -1,5 +1,6 @@
 package com.example.p2pchat.views;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 
@@ -21,6 +22,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -86,6 +88,7 @@ public class ChatFragment extends Fragment {
         } else {
             deleteButton.setVisibility(View.INVISIBLE);
         }
+
         return view;
     }
 
@@ -117,8 +120,13 @@ public class ChatFragment extends Fragment {
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                chatFragmentViewModel.sendMessage(messageText.getText().toString());
-                messageText.setText("");
+                String messageStr = messageText.getText().toString().trim();
+                if(messageStr.equals("")){
+                    return;
+                } else {
+                    chatFragmentViewModel.sendMessage(messageStr);
+                    messageText.setText("");
+                }
             }
         });
         backButton.setOnClickListener(new View.OnClickListener() {
