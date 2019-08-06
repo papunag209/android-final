@@ -1,5 +1,6 @@
 package com.example.p2pchat.adapters;
 
+import android.net.wifi.p2p.WifiP2pDevice;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,17 +15,21 @@ import com.example.p2pchat.data.model.dataholder.PeerStatusHolder;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.example.p2pchat.MainActivity.getDeviceStatus;
+
 
 public class PeersRecyclerViewAdapter extends RecyclerView.Adapter<PeersRecyclerViewAdapter.ViewHolder> {
     private static final String TAG = "PeersRecyclerViewAdapter";
-    List<PeerStatusHolder> peers;
+    List<WifiP2pDevice> peers;
     OnRecycleItem onRecycleItem;
 
+    public List<WifiP2pDevice> getDataset(){
+        return peers;
+    }
 
-    public PeersRecyclerViewAdapter(ArrayList<PeerStatusHolder> peers, OnRecycleItem onRecycleItem) {
+    public PeersRecyclerViewAdapter(ArrayList<WifiP2pDevice> peers) {
         super();
         this.peers = peers;
-        this.onRecycleItem = onRecycleItem;
 //        peers = new ArrayList<>();
 //        peers.add("abcd");
 //        peers.add("1234");
@@ -32,6 +37,10 @@ public class PeersRecyclerViewAdapter extends RecyclerView.Adapter<PeersRecycler
 //        peers.add("abcd");
 //        peers.add("1234");
 //        peers.add("!@#$");
+    }
+    public void setRecycleItem(OnRecycleItem onRecycleItem){
+        this.onRecycleItem = onRecycleItem;
+
     }
 
     @NonNull
@@ -44,8 +53,8 @@ public class PeersRecyclerViewAdapter extends RecyclerView.Adapter<PeersRecycler
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.peerNameTextView.setText(peers.get(position).getName());
-        holder.peerStatusTextView.setText(peers.get(position).getStatus());
+        holder.peerNameTextView.setText(peers.get(position).deviceName);
+        holder.peerStatusTextView.setText(getDeviceStatus(peers.get(position).status));
     }
 
     @Override
@@ -54,7 +63,7 @@ public class PeersRecyclerViewAdapter extends RecyclerView.Adapter<PeersRecycler
         return peers.size();
     }
 
-    public void setDataSet(List<PeerStatusHolder> s) {
+    public void setDataSet(List<WifiP2pDevice> s) {
         peers = s;
         notifyDataSetChanged();
     }

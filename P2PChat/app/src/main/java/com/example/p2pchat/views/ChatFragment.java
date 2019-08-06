@@ -29,6 +29,7 @@ import android.widget.TextView;
 import androidx.appcompat.widget.Toolbar;
 
 import com.example.p2pchat.App;
+import com.example.p2pchat.MainActivity;
 import com.example.p2pchat.R;
 import com.example.p2pchat.adapters.MessagesRecyclerViewAdapter;
 import com.example.p2pchat.data.Database;
@@ -39,8 +40,11 @@ import com.example.p2pchat.viewModels.ChatFragmentViewModel;
 
 import java.util.List;
 
+import io.reactivex.functions.Function;
+
 public class ChatFragment extends Fragment {
     private static final String TAG = "ChatFragment";
+    MainActivity mainActivity;
     RecyclerView recyclerView;
     MessagesRecyclerViewAdapter recyclerAdapter;
     ChatFragmentViewModel chatFragmentViewModel;
@@ -59,6 +63,7 @@ public class ChatFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mainActivity = ((MainActivity)getActivity());
     }
 
     @Override
@@ -119,13 +124,39 @@ public class ChatFragment extends Fragment {
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                navController.navigateUp();
+                if (getArguments().getBoolean("HistoryMode") == true){
+                    navController.navigateUp();
+                } else {
+                    popUpDialogue("Yes", "Do you want to disconnect from peer?"
+                            , new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    //TODO: implement disconnect
+                                    closeChatSession();
+                                }
+                            }, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+
+                                }
+                            });
+                }
             }
         });
         deleteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 displayDeletePopup();
+            }
+        });
+    }
+
+    private void closeChatSession(){
+        mainActivity.removeConnection(new ConnectionListener() {
+            @Override
+            public void onDisconnect() {
+                Log.d(TAG, "onDisconnect: NAVIGATING UP!!!");
+//                navController.navigateUp();
             }
         });
     }
@@ -203,4 +234,7 @@ public class ChatFragment extends Fragment {
         super.onDetach();
     }
 
+    public interface ConnectionListener{
+        void onDisconnect();
+    }
 }

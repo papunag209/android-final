@@ -17,10 +17,12 @@ import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 
+import com.example.p2pchat.adapters.PeersRecyclerViewAdapter;
 import com.example.p2pchat.data.DataDao;
 import com.example.p2pchat.data.Database;
 import com.example.p2pchat.data.model.MessageStatus;
 import com.example.p2pchat.data.model.Session;
+import com.example.p2pchat.data.model.dataholder.PeerStatusHolder;
 import com.example.p2pchat.data.model.helperModel.MessageWithMacAddress;
 import com.example.p2pchat.interfaces.BroadcastController;
 import com.example.p2pchat.interfaces.P2pController;
@@ -28,6 +30,7 @@ import com.example.p2pchat.receivers.WifiBroadcastReceiver;
 import com.example.p2pchat.threads.ClientSideThread;
 import com.example.p2pchat.threads.SendAndReceive;
 import com.example.p2pchat.threads.ServerSideThread;
+import com.example.p2pchat.views.ChatFragment;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -59,6 +62,7 @@ import androidx.lifecycle.Observer;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.Menu;
 import android.widget.Toast;
@@ -68,10 +72,12 @@ import org.apache.commons.lang3.SerializationUtils;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 
 import io.reactivex.CompletableObserver;
+import io.reactivex.SingleObserver;
 import io.reactivex.disposables.Disposable;
 
 public class MainActivity extends AppCompatActivity
@@ -101,7 +107,9 @@ public class MainActivity extends AppCompatActivity
         this.server = server;
     }
 
+    private RecyclerView recyclerView;
     private static String myMacAddress;
+    private int myDeviceStatus;
 
     ServerSideThread server;
 
@@ -142,10 +150,9 @@ public class MainActivity extends AppCompatActivity
         return this.peers;
     }
 
-
     @Override
-    public void setConnectedDevice(WifiP2pDevice connectedDevice) {
-        this.connectedDevice = connectedDevice;
+    public void setRecyclerView(RecyclerView recyclerView) {
+        this.recyclerView = recyclerView;
     }
 
     @Override
@@ -191,18 +198,25 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public void removeConnection() {
+    public void removeConnection(final ChatFragment.ConnectionListener listener) {
         if(wManager != null && wChannel != null) {
             wManager.removeGroup(wChannel, new WifiP2pManager.ActionListener() {
                 @Override
                 public void onSuccess() {
                     closeSockets();
                     Log.d(TAG, "onSuccess: DETACHED FROM PEER");
+                    if(listener!=null) {
+                        listener.onDisconnect();
+                    }
                 }
 
                 @Override
+
                 public void onFailure(int i) {
                     Log.d(TAG, "onFailure: FAILED TO DETACH FROM PEER");
+                    if(listener!=null) {
+                        listener.onDisconnect();
+                    }
                 }
             });
         }
@@ -292,6 +306,11 @@ public class MainActivity extends AppCompatActivity
                 Log.d(TAG, "Failed to connect to device: " + device.deviceName);
             }
         });
+    }
+
+    @Override
+    public int getDeviceStatus() {
+        return myDeviceStatus;
     }
 
     public static final int MESSAGE_READ = 5;
@@ -396,8 +415,35 @@ public class MainActivity extends AppCompatActivity
         wFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
         wFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
         wFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
-        removeConnection();
+        removeConnection(null);
 //        testSerialization();
+
+        peers.observe(this, new Observer<Collection<WifiP2pDevice>>() {
+            @Override
+            public void onChanged(Collection<WifiP2pDevice> wifiP2pDevices) {
+                Log.d(TAG, "onChanged: SOMETHING CHANGED!!!");
+                if(wifiP2pDevices == null || wifiP2pDevices.size() ==0){
+
+                }else {
+                    ArrayList<WifiP2pDevice> peerList = new ArrayList<WifiP2pDevice>();
+                    for (WifiP2pDevice device : wifiP2pDevices) {
+                        peerList.add(device);
+
+                        Log.d(TAG, "onChanged: DEVICE STATUS IS: " + device.status);
+                        if (device.status == WifiP2pDevice.CONNECTED && getDeviceStatus() == WifiP2pDevice.CONNECTED) {
+                            Log.d(TAG, "onChanged: DEVICE IS CONNECTED");
+                            registerSessionForDevice(device);
+                        }
+                    }
+                    ((PeersRecyclerViewAdapter) recyclerView.getAdapter()).setDataSet(peerList);
+                }
+            }
+
+
+        });
+
+
+
         Database.getInstance().dataDao().getPendingMessages().observe(this, new Observer<List<MessageWithMacAddress>>() {
             @Override
             public void onChanged(List<MessageWithMacAddress> messageWithMacAddresses) {
@@ -465,6 +511,46 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         });
+    }
+
+    private void registerSessionForDevice(final WifiP2pDevice device){
+        if (device != null) {
+            connectedDevice = device;
+            Log.d(TAG, "registerSessionForDevice: CONNECTED DEVICE IS: " + device);
+            Log.d(TAG, "onChanged:Connected Device Address Is: " + device.deviceAddress);
+
+            Session s = new Session();
+            s.setPeerPhoneName(device.deviceName);
+            s.setPeerMac(device.deviceAddress);
+            s.setSessionStartTime(Calendar.getInstance().getTime().toString());
+
+            Database.getInstance().dataDao().inserSessionAsync(s).subscribe(new SingleObserver<Long>() {
+                @Override
+                public void onSubscribe(Disposable d) {
+
+                }
+
+                @Override
+                public void onSuccess(Long aLong) {
+                    Log.d(TAG, "onSuccess: " + Database.getInstance().dataDao().getSessionsSync());
+                    Log.d(TAG, "onSuccess: REGISTERED WITH :" + aLong);
+                    Log.d(TAG, "onSuccess: session is:" + Database.getInstance().dataDao().getSessionByIdSync(aLong));
+                    Bundle args = new Bundle();
+                    args.putLong("SessionId", aLong);
+                    args.putString("PeerMac", device.deviceAddress);
+                    navController.navigate(R.id.chatFragment, args);
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                    Log.d(TAG, "onError: REGISTER FAILED");
+                    Bundle args = new Bundle();
+                    Log.d(TAG, "onError: ah shit here we go again" + device.status);
+                    args.putString("PeerMac", device.deviceAddress);
+                    navController.navigate(R.id.chatFragment, args);
+                }
+            });
+        }
     }
 
     private void sendPendingMessage(MessageWithMacAddress msg){
@@ -585,7 +671,10 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-        } else {
+        } if (navController.getCurrentDestination().getId() == R.id.chatFragment){
+            navController.navigateUp();
+        }
+        else {
             super.onBackPressed();
         }
     }
@@ -619,7 +708,16 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_home) {
-            navController.navigate(R.id.mainFragment);
+            Log.d(TAG, "onNavigationItemSelected: my status is: " + (myDeviceStatus == WifiP2pDevice.CONNECTED));
+            if (myDeviceStatus == WifiP2pDevice.CONNECTED){
+                Bundle args = new Bundle();
+                args.putString("PeerMac", connectedDevice.deviceAddress);
+                Log.d(TAG, "onNavigationItemSelected: args:" + args);
+                navController.navigate(R.id.chatFragment, args);
+                Log.d(TAG, "onNavigationItemSelected: navigated to chatFragment");
+            } else {
+                navController.navigate(R.id.mainFragment);
+            }
         } else if (id == R.id.nav_history) {
             navController.navigate(R.id.historyFragment);
         } else if (id == R.id.nav_debug) {
@@ -635,6 +733,14 @@ public class MainActivity extends AppCompatActivity
     public void updateOurDevice(int status) {
         //TODO UPDATED STATUS FOR OUR DEVICE
         Log.d(TAG, "updateOurDevice: device status updated:" + getDeviceStatus(status));
+        myDeviceStatus = status;
+        if(status != WifiP2pDevice.CONNECTED){
+            Log.d(TAG, "updateOurDevice: came in here"  + getDeviceStatus(status));
+            if (navController.getCurrentDestination().getId() == R.id.chatFragment){
+                Log.d(TAG, "updateOurDevice: tyvnai kargisai");
+                navController.navigateUp();
+            }
+        }
     }
 
     @Override

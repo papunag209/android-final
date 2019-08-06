@@ -45,7 +45,7 @@ public class SendAndReceive extends Thread {
                     out.write(bytes);
                 } catch (IOException e) {
                     e.printStackTrace();
-                    activity.removeConnection();
+                    activity.removeConnection(null);
                 }
             }
         }).start();
