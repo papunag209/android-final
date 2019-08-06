@@ -14,6 +14,7 @@ import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import com.example.p2pchat.adapters.PeersRecyclerViewAdapter;
@@ -222,11 +223,13 @@ public class MainActivity extends AppCompatActivity
         super.onPause();
         if (wReceiver != null) {
             try {
+                removeConnection(null);
                 unregisterReceiver(wReceiver);
             } catch (IllegalArgumentException e) {
                 e.printStackTrace();
             }
         }
+
     }
 
     public static String getDeviceStatus(int status) {
@@ -334,30 +337,32 @@ public class MainActivity extends AppCompatActivity
                     if(msg != null && connectedDevice != null){
                         Log.d(TAG, "handleMessage: DESERIALIZED MSG: " + msg);
                         //TODO MODIFY INSERT
-                        DataDao dao = Database.getInstance().dataDao();
-                        Session session = dao.getSessionByMacSync(connectedDevice.deviceAddress);
-                        final com.example.p2pchat.data.model.Message m = new com.example.p2pchat.data.model.Message();
-                        m.setMessageStatus(MessageStatus.RECEIVED);
-                        m.setSessionId(session.getSessionId());
-                        m.setMessageText(msg.getMessageText());
-                        m.setMessageTime(msg.getMessageTime());
-                        dao.insertMessageAsync(m).subscribe(new CompletableObserver() {
-                            @Override
-                            public void onSubscribe(Disposable d) {
+                        new InsertMessageAsync(connectedDevice.deviceAddress,msg).execute();
 
-                            }
-
-                            @Override
-                            public void onComplete() {
-                                Log.d(TAG, "onComplete: message inserted: " + m);
-                            }
-
-                            @Override
-                            public void onError(Throwable e) {
-
-                            }
-                        });
-                        Toast.makeText(MainActivity.this, m.getMessageText(), Toast.LENGTH_SHORT).show();
+//                        DataDao dao = Database.getInstance().dataDao();
+//                        Session session = dao.getSessionByMacSync(connectedDevice.deviceAddress);
+//                        final com.example.p2pchat.data.model.Message m = new com.example.p2pchat.data.model.Message();
+//                        m.setMessageStatus(MessageStatus.RECEIVED);
+//                        m.setSessionId(session.getSessionId());
+//                        m.setMessageText(msg.getMessageText());
+//                        m.setMessageTime(msg.getMessageTime());
+//                        dao.insertMessageAsync(m).subscribe(new CompletableObserver() {
+//                            @Override
+//                            public void onSubscribe(Disposable d) {
+//
+//                            }
+//
+//                            @Override
+//                            public void onComplete() {
+//                                Log.d(TAG, "onComplete: message inserted: " + m);
+//                            }
+//
+//                            @Override
+//                            public void onError(Throwable e) {
+//
+//                            }
+//                        });
+                        Toast.makeText(MainActivity.this, msg.getMessageText(), Toast.LENGTH_SHORT).show();
 
                     }else{
                         Toast.makeText(MainActivity.this, "Someone without our app is trying to send data. Aborting Connection", Toast.LENGTH_SHORT).show();
@@ -369,6 +374,30 @@ public class MainActivity extends AppCompatActivity
             return true;
         }
     });
+
+    class InsertMessageAsync extends AsyncTask<Void,Void,Void>{
+        String peermac;
+        MessageWithMacAddress msg;
+
+        public InsertMessageAsync(String deviceAddress, MessageWithMacAddress msg) {
+            this.peermac = peermac;
+            this.msg = msg;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+
+            DataDao dao = Database.getInstance().dataDao();
+            Session session = dao.getSessionByMacSync(connectedDevice.deviceAddress);
+            final com.example.p2pchat.data.model.Message m = new com.example.p2pchat.data.model.Message();
+            m.setMessageStatus(MessageStatus.RECEIVED);
+            m.setSessionId(session.getSessionId());
+            m.setMessageText(msg.getMessageText());
+            m.setMessageTime(msg.getMessageTime());
+            dao.insertMessage(m);
+            return null;
+        }
+    }
 
     private void startApp() {
         WifiManager wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
@@ -443,22 +472,25 @@ public class MainActivity extends AppCompatActivity
                         Log.d(TAG, "onChanged: msg mac is:" + msg.getPeerMac());
                         if(connectedDevice != null) {
                             msg.setMessageStatus(MessageStatus.SENT);
-                            Database.getInstance().dataDao().updateMessage(msg).subscribe(new CompletableObserver() {
-                                @Override
-                                public void onSubscribe(Disposable d) {
 
-                                }
-                                @Override
-                                public void onComplete() {
-                                    Log.d(TAG, "onComplete: message updated now sending");
-                                    sendPendingMessage(msg);
-                                }
-
-                                @Override
-                                public void onError(Throwable e) {
-
-                                }
-                            });
+                            new RegisterAndSendMessageAsync().execute(new MessageWithMacAddress[]{msg});
+                            sendPendingMessage(msg);
+//                            Database.getInstance().dataDao().updateMessage(msg).subscribe(new CompletableObserver() {
+//                                @Override
+//                                public void onSubscribe(Disposable d) {
+//
+//                                }
+//                                @Override
+//                                public void onComplete() {
+//                                    Log.d(TAG, "onComplete: message updated now sending");
+//                                    sendPendingMessage(msg);
+//                                }
+//
+//                                @Override
+//                                public void onError(Throwable e) {
+//
+//                                }
+//                            });
                         }
                     }
                 }
@@ -490,6 +522,20 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
+    class RegisterAndSendMessageAsync extends AsyncTask<MessageWithMacAddress,Void,Void>{
+
+        @Override
+        protected Void doInBackground(MessageWithMacAddress... messageWithMacAddresses) {
+            try {
+                Database.getInstance().dataDao().updateMessage(messageWithMacAddresses[0]);
+            }catch (Exception e){
+                Log.d(TAG, "doInBackground: ERROR UPDATING MSG");
+            }
+            return null;
+        }
+    }
+
+
     private void registerSessionForDevice(final WifiP2pDevice device){
         if (device != null) {
             connectedDevice = device;
@@ -500,35 +546,69 @@ public class MainActivity extends AppCompatActivity
             s.setPeerPhoneName(device.deviceName);
             s.setPeerMac(device.deviceAddress);
             s.setSessionStartTime(Calendar.getInstance().getTime().toString());
-
-            Database.getInstance().dataDao().inserSessionAsync(s).subscribe(new SingleObserver<Long>() {
-                @Override
-                public void onSubscribe(Disposable d) {
-
-                }
-
-                @Override
-                public void onSuccess(Long aLong) {
-                    Log.d(TAG, "onSuccess: " + Database.getInstance().dataDao().getSessionsSync());
-                    Log.d(TAG, "onSuccess: REGISTERED WITH :" + aLong);
-                    Log.d(TAG, "onSuccess: session is:" + Database.getInstance().dataDao().getSessionByIdSync(aLong));
-                    Bundle args = new Bundle();
-                    args.putLong("SessionId", aLong);
-                    args.putString("PeerMac", device.deviceAddress);
-                    navController.navigate(R.id.chatFragment, args);
-                }
-
-                @Override
-                public void onError(Throwable e) {
-                    Log.d(TAG, "onError: REGISTER FAILED");
-                    Bundle args = new Bundle();
-                    Log.d(TAG, "onError: ah shit here we go again" + device.status);
-                    args.putString("PeerMac", device.deviceAddress);
-                    navController.navigate(R.id.chatFragment, args);
-                }
-            });
+            new InsertSessionAsync(device).execute(new Session[]{s});
+//            Database.getInstance().dataDao().inserSessionAsync(s).subscribe(new SingleObserver<Long>() {
+//                @Override
+//                public void onSubscribe(Disposable d) {
+//
+//                }
+//
+//                @Override
+//                public void onSuccess(Long aLong) {
+//                    Log.d(TAG, "onSuccess: " + Database.getInstance().dataDao().getSessionsSync());
+//                    Log.d(TAG, "onSuccess: REGISTERED WITH :" + aLong);
+//                    Log.d(TAG, "onSuccess: session is:" + Database.getInstance().dataDao().getSessionByIdSync(aLong));
+//                    Bundle args = new Bundle();
+//                    args.putLong("SessionId", aLong);
+//                    args.putString("PeerMac", device.deviceAddress);
+//                    navController.navigate(R.id.chatFragment, args);
+//                }
+//
+//                @Override
+//                public void onError(Throwable e) {
+//                    Log.d(TAG, "onError: REGISTER FAILED");
+//                    Bundle args = new Bundle();
+//                    Log.d(TAG, "onError: ah shit here we go again" + device.status);
+//                    args.putString("PeerMac", device.deviceAddress);
+//                    navController.navigate(R.id.chatFragment, args);
+//                }
+//            });
         }
     }
+
+    class InsertSessionAsync extends AsyncTask<Session,Void,Void>{
+
+        WifiP2pDevice device;
+
+        public InsertSessionAsync(WifiP2pDevice device){
+            this.device = device;
+        }
+
+        @Override
+        protected Void doInBackground(Session... sessions) {
+            try {
+                Database.getInstance().dataDao().insertSession(sessions[0]);
+            }catch (Exception e){
+                Log.d(TAG, "doInBackground: ERRORED");
+            }
+            return null;
+        }
+
+
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            Log.d(TAG, "onError: REGISTER FAILED");
+            Bundle args = new Bundle();
+            Log.d(TAG, "onError: ah shit here we go again" + device.status);
+            args.putString("PeerMac", device.deviceAddress);
+            navController.navigate(R.id.chatFragment, args);
+        }
+
+
+    }
+
+
 
     private void sendPendingMessage(MessageWithMacAddress msg){
 //        getSendAndReceive().write(msg);

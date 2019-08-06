@@ -27,7 +27,7 @@ public abstract class Database extends RoomDatabase {
                         App.getContext(),
                         Database.class,
                         DATABASE_NAME)
-                        .allowMainThreadQueries()
+//                        .allowMainThreadQueries()
                         .build();
             }
         }

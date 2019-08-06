@@ -1,5 +1,6 @@
 package com.example.p2pchat.viewModels;
 
+import android.os.AsyncTask;
 import android.util.Log;
 
 import androidx.lifecycle.LifecycleOwner;
@@ -39,26 +40,24 @@ public class ChatFragmentViewModel extends ViewModel {
         messagesListLiveData = dao.getMessages(sessionId);
     }
 
+    public void setSessionId(Long sessionId) {
+        this.sessionId = sessionId;
+    }
+
     public void init(String peerMac, LifecycleOwner lifecycleOwner) {
 //        this.sessionId = sessionId;
         dao = Database.getInstance().dataDao();
-        Session session = dao.getSessionByMacSync(peerMac);
-        Log.d(TAG, "init with MAC: session got from db is: " + session);
-        this.sessionId = session.getSessionId();
-        sessionLiveData = dao.getSessionById(sessionId);
-        messagesListLiveData = dao.getMessages(sessionId);
-//        sessionLiveData = dao.getSessionByMac(peerMac);
-//        sessionLiveData.observe(lifecycleOwner, new Observer<Session>() {
-//            @Override
-//            public void onChanged(Session session) {
-//                Log.d(TAG, "onChanged: session is: " + session);
-//                if(session!=null){
-//                    sessionId = session.getSessionId();
-//                    messagesListLiveData = dao.getMessages(sessionId);
-//                }
-//            }
-//        });
+//        Session session = dao.getSessionByMacSync(peerMac);
+//        Log.d(TAG, "init with MAC: session got from db is: " + session);
+//        this.sessionId = session.getSessionId();
+//        sessionLiveData = dao.getSessionById(sessionId);
+//        messagesListLiveData = dao.getMessages(sessionId);
+
+        sessionLiveData = dao.getSessionByMac(peerMac);
+        messagesListLiveData = dao.getMessagesByMac(peerMac);
+
     }
+
 
     public LiveData<List<Message>> getMessages() {
         return messagesListLiveData;
@@ -80,23 +79,17 @@ public class ChatFragmentViewModel extends ViewModel {
 //        Log.d(TAG, "sendMessage: session data: " + sessionLiveData.getValue());
 //        Log.d(TAG, "sendMessage: message data:" + messagesListLiveData.getValue());
         Log.d(TAG, "sendMessage: session is:" + sessionLiveData.getValue() + " message to send is: " + messageToSend );
-        Completable insertDone = dao.insertMessageAsync(messageToSend);
-        insertDone.subscribe(new CompletableObserver() {
-            @Override
-            public void onSubscribe(Disposable d) {
-                Log.d(TAG, "onSubscribe: ");
-            }
+        new InsertAsync().execute(new Message[]{messageToSend});
 
-            @Override
-            public void onComplete() {
-                Log.d(TAG, "onComplete: inserted successfully");
-            }
 
-            @Override
-            public void onError(Throwable e) {
-                Log.e(TAG, "onError: message insert not inserted successfully!", e);
-            }
-        });
+    }
+    class InsertAsync extends AsyncTask<Message,Void,Void>{
+        @Override
+        protected Void doInBackground(Message... messages) {
+            Log.d(TAG, "doInBackground: DOING IN BACKGROUnd"+messages[0]);
+            dao.insertMessage(messages[0]);
+            return null;
+        }
     }
 
     public void deleteThisSession() {

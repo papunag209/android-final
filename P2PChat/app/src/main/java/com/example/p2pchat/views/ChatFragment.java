@@ -188,7 +188,7 @@ public class ChatFragment extends Fragment {
                 if (session == null) {
 //                    navController.navigateUp();
                 }
-
+                chatFragmentViewModel.setSessionId(session.getSessionId());
             }
         });
         LiveData<SessionWithMessageCount> s;

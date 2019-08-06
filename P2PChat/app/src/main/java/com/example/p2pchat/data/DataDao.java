@@ -43,6 +43,8 @@ public interface DataDao {
     @Query("select * from Session where peerMac = :mac")
     Session getSessionByMacSync(String mac);
 
+    @Query("select * from Message m, Session s where m.SessionId = s.SessionId and s.peerMac = :peerMac")
+    LiveData<List<Message>> getMessagesByMac(String peerMac);
 
     @Insert
     Long insertSession(Session session);
@@ -78,7 +80,7 @@ public interface DataDao {
 
 
     @Update
-    Completable updateMessage(Message message);
+    void updateMessage(Message message);
 
     @Query("delete from Message")
     void clearMessages();
