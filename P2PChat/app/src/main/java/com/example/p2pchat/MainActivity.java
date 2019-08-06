@@ -163,6 +163,7 @@ public class MainActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
 //        removeConnection();
+        Log.d(TAG, "onResume: SHEMOVEDI ONRESUMESHI");
         registerReceiver(wReceiver, wFilter);
 
     }
@@ -256,7 +257,6 @@ public class MainActivity extends AppCompatActivity
                 Log.d(TAG, "onConnectionInfoAvailable: REQUESTING GROUP INFO");
 
                 Log.d(TAG, "onConnectionInfoAvailable: YOU ARE THE HOST");
-                Toast.makeText(MainActivity.this, "YOU ARE THE HOST", Toast.LENGTH_SHORT).show();
 
                 server = new ServerSideThread(handler, MainActivity.this);
                 Log.d(TAG, "onConnectionInfoAvailable:Server THREAD CREATED!!!");
@@ -265,7 +265,6 @@ public class MainActivity extends AppCompatActivity
             } else {
                 Log.d(TAG, "onConnectionInfoAvailable: REQUESTING GROUP INFO");
                 Log.d(TAG, "onConnectionInfoAvailable: YOU ARE THE CLIENT");
-                Toast.makeText(MainActivity.this, "YOU ARE THE CLIENT", Toast.LENGTH_SHORT).show();
                 Log.d(TAG, "onConnectionInfoAvailable: GROUP OWNDER ADDRESS: " + groupOwnerAddress);
                 client = new ClientSideThread(groupOwnerAddress, handler, MainActivity.this);
                 Log.d(TAG, "onConnectionInfoAvailable:Client THREAD CREATED!!!");
@@ -360,8 +359,8 @@ public class MainActivity extends AppCompatActivity
 
                             }
                         });
+                        Toast.makeText(MainActivity.this, finalMsg.getMessageText(), Toast.LENGTH_SHORT).show();
                     }
-                    Toast.makeText(MainActivity.this, "Message read: " + tempMsg, Toast.LENGTH_SHORT).show();
                     break;
 
             }
@@ -373,8 +372,11 @@ public class MainActivity extends AppCompatActivity
 
     private void startApp() {
         WifiManager wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-        //TODO CHECK WIFI
         assert wifiManager != null;
+        if(!wifiManager.isWifiEnabled()){
+            popWifiDialogue();
+        }
+
         myMacAddress = wifiManager.getConnectionInfo().getMacAddress();
 
 
@@ -626,6 +628,31 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         }
+    }
+
+    public AlertDialog popWifiDialogue(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setCancelable(false);
+        builder.setMessage("This app needs WIFI enabled to run");
+        builder.setPositiveButton("Go To Settings", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
+
+                finish();
+            }
+        });
+        builder.setNegativeButton("Exit App", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                dialogInterface.dismiss();
+                finish();
+            }
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
+        return alert;
     }
 
     public AlertDialog popUpDialogue(String positiveLabel,

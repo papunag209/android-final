@@ -77,7 +77,7 @@ public class ChatFragment extends Fragment {
         messageText = view.findViewById(R.id.editText_messageInput);
         backButton = view.findViewById(R.id.imageButton_chatBack);
         deleteButton = view.findViewById(R.id.imageButton_deleteThisMessage);
-        phoneName = view.findViewById(R.id.textView_peerName);
+        phoneName = view.findViewById(R.id.textView_peerPhoneName);
 
         Boolean isHistoryMode = getArguments().getBoolean("HistoryMode");
         if (isHistoryMode) {
@@ -167,6 +167,9 @@ public class ChatFragment extends Fragment {
             public void onChanged(List<Message> messages) {
                 Log.d(TAG, "onChanged: messages changed to: " + messages);
                 recyclerAdapter.updateDataSet(messages);
+                if(messages!=null && messages.size()>0){
+                    recyclerView.smoothScrollToPosition(messages.size()-1);
+                }
             }
         });
         chatFragmentViewModel.getSession().observe(this, new Observer<Session>() {
@@ -184,8 +187,10 @@ public class ChatFragment extends Fragment {
         s.observe(this, new Observer<SessionWithMessageCount>() {
             @Override
             public void onChanged(SessionWithMessageCount sessionWithMessageCount) {
-                phoneName.setText(sessionWithMessageCount.getPeerPhoneName());
-                Log.d(TAG, "onChanged: session with message count: " + sessionWithMessageCount);
+                if(sessionWithMessageCount != null) {
+                    phoneName.setText(sessionWithMessageCount.getPeerPhoneName());
+                    Log.d(TAG, "onChanged: session with message count: " + sessionWithMessageCount);
+                }
             }
         });
     }
