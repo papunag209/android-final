@@ -422,21 +422,24 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onChanged(Collection<WifiP2pDevice> wifiP2pDevices) {
                 Log.d(TAG, "onChanged: SOMETHING CHANGED!!!");
-                ArrayList<WifiP2pDevice> peerList = new ArrayList<WifiP2pDevice>();
-                for (WifiP2pDevice device : wifiP2pDevices) {
-                    peerList.add(device);
+                if(wifiP2pDevices == null || wifiP2pDevices.size() ==0){
 
-                    Log.d(TAG, "onChanged: DEVICE STATUS IS: "  +device.status);
-                    if(device.status == WifiP2pDevice.CONNECTED && getDeviceStatus() == WifiP2pDevice.CONNECTED){
-                        Log.d(TAG, "onChanged: DEVICE IS CONNECTED");
-                        registerSessionForDevice(device);
+                }else {
+                    ArrayList<WifiP2pDevice> peerList = new ArrayList<WifiP2pDevice>();
+                    for (WifiP2pDevice device : wifiP2pDevices) {
+                        peerList.add(device);
+
+                        Log.d(TAG, "onChanged: DEVICE STATUS IS: " + device.status);
+                        if (device.status == WifiP2pDevice.CONNECTED && getDeviceStatus() == WifiP2pDevice.CONNECTED) {
+                            Log.d(TAG, "onChanged: DEVICE IS CONNECTED");
+                            registerSessionForDevice(device);
+                        }
                     }
+                    ((PeersRecyclerViewAdapter) recyclerView.getAdapter()).setDataSet(peerList);
                 }
-                ((PeersRecyclerViewAdapter) recyclerView.getAdapter()).setDataSet(peerList);
-
-//                peerLst = s.toArray(new WifiP2pDevice[s.size()]);
-
             }
+
+
         });
 
 
@@ -705,7 +708,16 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_home) {
-            navController.navigate(R.id.mainFragment);
+            Log.d(TAG, "onNavigationItemSelected: my status is: " + (myDeviceStatus == WifiP2pDevice.CONNECTED));
+            if (myDeviceStatus == WifiP2pDevice.CONNECTED){
+                Bundle args = new Bundle();
+                args.putString("PeerMac", connectedDevice.deviceAddress);
+                Log.d(TAG, "onNavigationItemSelected: args:" + args);
+                navController.navigate(R.id.chatFragment, args);
+                Log.d(TAG, "onNavigationItemSelected: navigated to chatFragment");
+            } else {
+                navController.navigate(R.id.mainFragment);
+            }
         } else if (id == R.id.nav_history) {
             navController.navigate(R.id.historyFragment);
         } else if (id == R.id.nav_debug) {
