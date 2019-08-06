@@ -29,6 +29,7 @@ public class ClientSideThread extends Thread {
         return socket;
     }
 
+    //threading idea taken from internet
     public ClientSideThread(InetAddress address, Handler handler, MainActivity activity) {
         socket = new Socket();
         this.address = address;

@@ -23,6 +23,7 @@ public class SendAndReceive extends Thread {
     private Handler handler;
     MainActivity activity;
 
+    //threading idea taken from internet
     public SendAndReceive(Socket socket, Handler handler, MainActivity activity) {
         this.socket = socket;
         this.handler = handler;
@@ -55,7 +56,7 @@ public class SendAndReceive extends Thread {
     public void run() {
         byte[] buff = new byte[SIZE];
         int bytes;
-
+        //code from google developers docs
         while (socket != null) {
             try {
                 bytes = in.read(buff);

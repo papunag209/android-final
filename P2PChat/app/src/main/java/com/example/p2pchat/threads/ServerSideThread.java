@@ -30,6 +30,7 @@ public class ServerSideThread extends Thread {
         return sendAndReceive;
     }
 
+    //threading idea taken from internet
     public ServerSideThread(Handler handler, MainActivity activity){
         this.handler = handler;
         this.activity = activity;
