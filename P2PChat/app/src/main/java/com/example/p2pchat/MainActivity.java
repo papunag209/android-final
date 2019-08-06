@@ -757,11 +757,42 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } if (navController.getCurrentDestination().getId() == R.id.chatFragment){
-            navController.navigateUp();
+//            removeConnection(null);
+            popUpDialogue("Yes", "Do you want to disconnect from peer?"
+                    , new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            //TODO: implement disconnect
+//                            closeChatSession();
+                                        removeConnection(null);
+                            navController.navigateUp();
+
+
+                        }
+                    }, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+
+                        }
+                    });
         }
         else {
             super.onBackPressed();
         }
+    }
+    public AlertDialog popUpDialogue(String positiveLabel,
+                                     String popupMessage,
+                                     DialogInterface.OnClickListener positiveOnClick,
+                                     DialogInterface.OnClickListener negativeOnClick) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setCancelable(true);
+        builder.setMessage(popupMessage);
+        builder.setPositiveButton(positiveLabel, positiveOnClick);
+        builder.setNegativeButton("Cancel", negativeOnClick);
+
+        AlertDialog alert = builder.create();
+        alert.show();
+        return alert;
     }
 
     @Override
