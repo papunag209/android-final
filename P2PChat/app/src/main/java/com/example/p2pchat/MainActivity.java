@@ -331,7 +331,7 @@ public class MainActivity extends AppCompatActivity
                         Log.d(TAG, "handleMessage: FAILED TO DESERIALIZE MSG");
                     }
 
-                    if(msg != null){
+                    if(msg != null && connectedDevice != null){
                         Log.d(TAG, "handleMessage: DESERIALIZED MSG: " + msg);
                         //TODO MODIFY INSERT
                         DataDao dao = Database.getInstance().dataDao();
@@ -429,9 +429,13 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onChanged(List<MessageWithMacAddress> messageWithMacAddresses) {
                 Log.d(TAG, "onChanged: GOT PENDING MSG LIST:" + messageWithMacAddresses);
-                if(connectedDevice == null ) {
+                Log.d(TAG, "onChangedMyStatus:" + myDeviceStatus);
+                if(connectedDevice == null) {
+                    removeConnection(null);
+                }else if(connectedDevice.status != WifiP2pDevice.CONNECTED){
                     removeConnection(null);
                 }
+
                 for(final MessageWithMacAddress msg : messageWithMacAddresses){
 //                    Log.d(TAG, "onChanged: msg:" + msg);
 //                    Log.d(TAG, "onChanged: msg.peermac:" + msg.getPeerMac());
