@@ -122,19 +122,23 @@ public class ChatFragment extends Fragment {
         backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                popUpDialogue("Yes", "Do you want to disconnect from peer?"
-                        , new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                //TODO: implement disconnect
-                                closeChatSession();
-                            }
-                        }, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
+                if (getArguments().getBoolean("HistoryMode") == true){
+                    navController.navigateUp();
+                } else {
+                    popUpDialogue("Yes", "Do you want to disconnect from peer?"
+                            , new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    //TODO: implement disconnect
+                                    closeChatSession();
+                                }
+                            }, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
 
-                            }
-                        });
+                                }
+                            });
+                }
             }
         });
         deleteButton.setOnClickListener(new View.OnClickListener() {
