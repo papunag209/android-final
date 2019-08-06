@@ -30,6 +30,7 @@ import com.example.p2pchat.threads.ClientSideThread;
 import com.example.p2pchat.threads.SendAndReceive;
 import com.example.p2pchat.threads.ServerSideThread;
 import com.example.p2pchat.views.ChatFragment;
+import com.example.p2pchat.views.MainFragment;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -42,6 +43,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
@@ -165,7 +167,7 @@ public class MainActivity extends AppCompatActivity
 //        removeConnection();
         Log.d(TAG, "onResume: SHEMOVEDI ONRESUMESHI");
         registerReceiver(wReceiver, wFilter);
-
+        discoverPeers();
     }
 
     private void closeSockets(){
@@ -396,13 +398,13 @@ public class MainActivity extends AppCompatActivity
             public void onChanged(Collection<WifiP2pDevice> wifiP2pDevices) {
                 Log.d(TAG, "onChanged: SOMETHING CHANGED!!!");
                 if(wifiP2pDevices == null || wifiP2pDevices.size() ==0){
-//                    ProgressBar bar = findViewById(R.id.progressBar);
-//                    bar.setVisibility(View.VISIBLE);
+                    ConstraintLayout overlay = findViewById(R.id.constraintLayout_mainFragmentOverlay);
+                    overlay.setVisibility(View.VISIBLE);
+
+
                 }else {
-
-//                    ProgressBar bar = findViewById(R.id.progressBar);
-//                    bar.setVisibility(View.GONE);
-
+                    ConstraintLayout overlay = findViewById(R.id.constraintLayout_mainFragmentOverlay);
+                    overlay.setVisibility(View.GONE);
 
                     ArrayList<WifiP2pDevice> peerList = new ArrayList<WifiP2pDevice>();
                     for (WifiP2pDevice device : wifiP2pDevices) {

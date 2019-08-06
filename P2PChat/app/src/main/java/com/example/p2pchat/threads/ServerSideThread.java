@@ -49,7 +49,7 @@ public class ServerSideThread extends Thread {
             Log.d(TAG, "run: INITIALIZED SEND AND RECEIVE" + sendAndReceive);
             sendAndReceive.start();
             Log.d(TAG, "run: sending msg from server");
-            sendAndReceive.write("gamadjobaa".getBytes());
+//            sendAndReceive.write("gamadjobaa".getBytes());
         } catch (IOException e) {
             e.printStackTrace();
         }

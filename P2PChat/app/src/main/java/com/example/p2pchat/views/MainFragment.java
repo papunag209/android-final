@@ -65,22 +65,6 @@ public class MainFragment extends Fragment {
         View view;
         view = inflater.inflate(R.layout.fragment_main, container, false);
         recyclerView = view.findViewById(R.id.recyclerView_chatPeers);
-        btn = view.findViewById(R.id.button4_sendMessage);
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //TODO temporary shit
-                SendAndReceive sendAndReceive = ((MainActivity) getActivity()).getSendAndReceive();
-                Log.d(TAG, "onclick: sendAndReceive : " + sendAndReceive);
-
-                if (sendAndReceive != null) {
-                    Log.d(TAG, "onClick: SENDING MESSAGE");
-                    sendAndReceive.write("HELLO".getBytes());
-                } else {
-                    ((MainActivity) getActivity()).removeConnection(null);
-                }
-            }
-        });
         return view;
     }
 

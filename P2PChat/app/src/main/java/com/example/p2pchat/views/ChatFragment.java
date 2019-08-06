@@ -54,6 +54,7 @@ public class ChatFragment extends Fragment {
     ImageButton deleteButton;
     TextView phoneName;
     NavController navController;
+    Button cancelSearchButton;
 
     public ChatFragment() {
         // Required empty public constructor
@@ -78,6 +79,7 @@ public class ChatFragment extends Fragment {
         backButton = view.findViewById(R.id.imageButton_chatBack);
         deleteButton = view.findViewById(R.id.imageButton_deleteThisMessage);
         phoneName = view.findViewById(R.id.textView_peerPhoneName);
+        cancelSearchButton = view.findViewById(R.id.button_cancelLoading);
 
         Boolean isHistoryMode = getArguments().getBoolean("HistoryMode");
         if (isHistoryMode) {
@@ -147,6 +149,12 @@ public class ChatFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 displayDeletePopup();
+            }
+        });
+        cancelSearchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                navController.navigate(R.id.historyFragment);
             }
         });
     }
