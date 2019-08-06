@@ -7,13 +7,11 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pConfig;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pDeviceList;
-import android.net.wifi.p2p.WifiP2pGroup;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
@@ -23,10 +21,10 @@ import com.example.p2pchat.data.DataDao;
 import com.example.p2pchat.data.Database;
 import com.example.p2pchat.data.model.MessageStatus;
 import com.example.p2pchat.data.model.Session;
-import com.example.p2pchat.data.model.dataholder.PeerStatusHolder;
 import com.example.p2pchat.data.model.helperModel.MessageWithMacAddress;
 import com.example.p2pchat.interfaces.BroadcastController;
 import com.example.p2pchat.interfaces.P2pController;
+import com.example.p2pchat.interfaces.ToolBarActions;
 import com.example.p2pchat.receivers.WifiBroadcastReceiver;
 import com.example.p2pchat.threads.ClientSideThread;
 import com.example.p2pchat.threads.SendAndReceive;
@@ -44,7 +42,6 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
@@ -67,7 +64,6 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.view.Menu;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import org.apache.commons.lang3.SerializationUtils;
@@ -84,7 +80,7 @@ import io.reactivex.SingleObserver;
 import io.reactivex.disposables.Disposable;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, P2pController, BroadcastController {
+        implements NavigationView.OnNavigationItemSelectedListener, P2pController, BroadcastController, ToolBarActions {
     private static final String TAG = "MainActivity";
     NavController navController;
     WifiP2pManager wManager;
@@ -93,6 +89,12 @@ public class MainActivity extends AppCompatActivity
     IntentFilter wFilter = new IntentFilter();
     ClientSideThread client;
     WifiP2pDevice connectedDevice = null;
+    Toolbar toolbar;
+
+    @Override
+    public void setTitle(String title) {
+        toolbar.setTitle(title);
+    }
 
     public ClientSideThread getClient() {
         return client;
@@ -453,6 +455,7 @@ public class MainActivity extends AppCompatActivity
         });
 
         final Toolbar toolbar = findViewById(R.id.toolbar);
+        this.toolbar = toolbar;
         setSupportActionBar(toolbar);
 //        toolbar.setVisibility(View.GONE);
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -735,4 +738,6 @@ public class MainActivity extends AppCompatActivity
     public WifiP2pManager.PeerListListener getPeerListListener() {
         return peerListListener;
     }
+
 }
+

@@ -20,6 +20,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.example.p2pchat.App;
 import com.example.p2pchat.R;
@@ -27,6 +28,7 @@ import com.example.p2pchat.adapters.HistoryRecyclerViewAdapter;
 import com.example.p2pchat.adapters.OnItemAction;
 import com.example.p2pchat.data.model.Session;
 import com.example.p2pchat.data.model.helperModel.SessionWithMessageCount;
+import com.example.p2pchat.interfaces.ToolBarActions;
 import com.example.p2pchat.viewModels.HistoryFragmentViewModel;
 
 import java.util.List;
@@ -39,6 +41,7 @@ public class HistoryFragment extends Fragment implements OnItemAction <Session>{
     private static final String TAG = "HistoryFragment";
     RecyclerView recyclerView;
     Button clearHistoryButton;
+    TextView historyNotFound;
     HistoryRecyclerViewAdapter historyRecyclerViewAdapter;
     HistoryFragmentViewModel historyFragmentViewModel;
 
@@ -54,6 +57,7 @@ public class HistoryFragment extends Fragment implements OnItemAction <Session>{
         View view = inflater.inflate(R.layout.fragment_history, container, false);
         this.recyclerView = view.findViewById(R.id.recyclerView_historyItems);
         this.clearHistoryButton = view.findViewById(R.id.button_clearHistory);
+        this.historyNotFound = view.findViewById(R.id.textView_historyNotFound);
         return view;
     }
 
@@ -82,6 +86,14 @@ public class HistoryFragment extends Fragment implements OnItemAction <Session>{
             @Override
             public void onChanged(List<SessionWithMessageCount> sessionWithMessageCounts) {
                 historyRecyclerViewAdapter.updateDataSet(sessionWithMessageCounts);
+                ToolBarActions actions = (ToolBarActions)getActivity();
+                if(sessionWithMessageCounts == null || sessionWithMessageCounts.size() == 0){
+                    actions.setTitle("History");
+                    historyNotFound.setVisibility(View.VISIBLE);
+                } else {
+                    actions.setTitle("History(" + sessionWithMessageCounts.size() + ")");
+                    historyNotFound.setVisibility(View.GONE);
+                }
             }
         });
     }
