@@ -57,13 +57,12 @@ public class SendAndReceive extends Thread {
         byte[] buff = new byte[SIZE];
         int bytes;
         //code from google developers docs
-        while (socket != null) {
+        while (socket != null && !socket.isClosed()) {
             try {
                 bytes = in.read(buff);
                 if (bytes > 0) {
                     handler.obtainMessage(MESSAGE_READ, bytes, -1, buff).sendToTarget();
                 }
-
             } catch (IOException e) {
                 e.printStackTrace();
             }

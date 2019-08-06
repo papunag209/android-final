@@ -48,7 +48,7 @@ public class ClientSideThread extends Thread {
 
                 sendAndReceive.start();
                 Log.d(TAG, "run: sending msg from client");
-                sendAndReceive.write("gamadjobaa".getBytes());
+//                sendAndReceive.write("gamadjobaa".getBytes());
             }
         } catch (IOException e) {
             e.printStackTrace();

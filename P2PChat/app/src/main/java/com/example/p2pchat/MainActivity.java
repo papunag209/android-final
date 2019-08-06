@@ -142,10 +142,6 @@ public class MainActivity extends AppCompatActivity
 
     private static final int PERMISSION_REQ_CODE = 1;
 
-    @Override
-    public LiveData<Collection<WifiP2pDevice>> getPeerLiveData() {
-        return this.peers;
-    }
 
     @Override
     public void setRecyclerView(RecyclerView recyclerView) {
@@ -164,12 +160,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-//        removeConnection();
         Log.d(TAG, "onResume: SHEMOVEDI ONRESUMESHI");
         registerReceiver(wReceiver, wFilter);
-        if(wChannel != null && wManager != null) {
-            discoverPeers();
-        }
     }
 
     private void closeSockets(){
@@ -214,6 +206,8 @@ public class MainActivity extends AppCompatActivity
 
                 public void onFailure(int i) {
                     Log.d(TAG, "onFailure: FAILED TO DETACH FROM PEER");
+                    closeSockets();
+
                     if(listener!=null) {
                         listener.onDisconnect();
                     }
@@ -346,7 +340,6 @@ public class MainActivity extends AppCompatActivity
                         m.setSessionId(session.getSessionId());
                         m.setMessageText(msg.getMessageText());
                         m.setMessageTime(msg.getMessageTime());
-                        final MessageWithMacAddress finalMsg = msg;
                         dao.insertMessageAsync(m).subscribe(new CompletableObserver() {
                             @Override
                             public void onSubscribe(Disposable d) {
@@ -355,7 +348,7 @@ public class MainActivity extends AppCompatActivity
 
                             @Override
                             public void onComplete() {
-                                Log.d(TAG, "onComplete: message inserted: " + m + "received message: " + finalMsg);
+                                Log.d(TAG, "onComplete: message inserted: " + m);
                             }
 
                             @Override
@@ -363,7 +356,11 @@ public class MainActivity extends AppCompatActivity
 
                             }
                         });
-                        Toast.makeText(MainActivity.this, finalMsg.getMessageText(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, m.getMessageText(), Toast.LENGTH_SHORT).show();
+
+                    }else{
+                        Toast.makeText(MainActivity.this, "Someone without our app is trying to send data. Aborting Connection", Toast.LENGTH_SHORT).show();
+                        removeConnection(null);
                     }
                     break;
 
@@ -371,8 +368,6 @@ public class MainActivity extends AppCompatActivity
             return true;
         }
     });
-
-
 
     private void startApp() {
         WifiManager wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
@@ -401,13 +396,15 @@ public class MainActivity extends AppCompatActivity
                 Log.d(TAG, "onChanged: SOMETHING CHANGED!!!");
                 if(wifiP2pDevices == null || wifiP2pDevices.size() ==0){
                     ConstraintLayout overlay = findViewById(R.id.constraintLayout_mainFragmentOverlay);
-                    overlay.setVisibility(View.VISIBLE);
-
+                    if(overlay != null) {
+                        overlay.setVisibility(View.VISIBLE);
+                    }
 
                 }else {
                     ConstraintLayout overlay = findViewById(R.id.constraintLayout_mainFragmentOverlay);
-                    overlay.setVisibility(View.INVISIBLE);
-
+                    if(overlay != null) {
+                        overlay.setVisibility(View.INVISIBLE);
+                    }
                     ArrayList<WifiP2pDevice> peerList = new ArrayList<WifiP2pDevice>();
                     for (WifiP2pDevice device : wifiP2pDevices) {
                         peerList.add(device);
@@ -551,18 +548,21 @@ public class MainActivity extends AppCompatActivity
         }
        }
 
-    private void discoverPeers() {
-        wManager.discoverPeers(wChannel, new WifiP2pManager.ActionListener() {
-            @Override
-            public void onSuccess() {
-                Toast.makeText(MainActivity.this, "Started Discovery", Toast.LENGTH_SHORT).show();
-            }
+    @Override
+    public void discoverPeers() {
+        if(wManager != null && wChannel != null) {
+            wManager.discoverPeers(wChannel, new WifiP2pManager.ActionListener() {
+                @Override
+                public void onSuccess() {
+                    Toast.makeText(MainActivity.this, "Started Discovery", Toast.LENGTH_SHORT).show();
+                }
 
-            @Override
-            public void onFailure(int i) {
-                Toast.makeText(MainActivity.this, "Ended Discovery " + i, Toast.LENGTH_SHORT).show();
-            }
-        });
+                @Override
+                public void onFailure(int i) {
+                    Toast.makeText(MainActivity.this, "Ended Discovery " + i, Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
     private boolean checkPermissions() {
@@ -744,7 +744,6 @@ public class MainActivity extends AppCompatActivity
         if(status != WifiP2pDevice.CONNECTED){
             Log.d(TAG, "updateOurDevice: came in here"  + getDeviceStatus(status));
             if (navController.getCurrentDestination().getId() == R.id.chatFragment){
-                Log.d(TAG, "updateOurDevice: tyvnai kargisai");
                 navController.navigateUp();
             }
         }

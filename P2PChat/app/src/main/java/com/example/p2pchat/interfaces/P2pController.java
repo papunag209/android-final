@@ -9,7 +9,6 @@ import java.util.Collection;
 
 public interface P2pController {
 
-        LiveData<Collection<WifiP2pDevice>> getPeerLiveData();
 
         void setRecyclerView(RecyclerView recyclerView);
 
@@ -17,5 +16,6 @@ public interface P2pController {
 
         int getDeviceStatus();
 
+        void discoverPeers();
 
 }
