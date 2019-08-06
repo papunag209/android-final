@@ -4,6 +4,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Transformation;
+import android.view.animation.TranslateAnimation;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -35,7 +37,8 @@ public class MessagesRecyclerViewAdapter extends RecyclerView.Adapter<MessagesRe
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        holder.messageText.setText(messages.get(position).getMessageText() + "\n" + messages.get(position).getMessageTime());
+        holder.messageText.setText(messages.get(position).getMessageText());
+        holder.messageTime.setText(messages.get(position).getMessageTime());
     }
 
     @Override
@@ -63,10 +66,23 @@ public class MessagesRecyclerViewAdapter extends RecyclerView.Adapter<MessagesRe
 
     class ViewHolder extends RecyclerView.ViewHolder{
         TextView messageText;
+        TextView messageTime;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             //int viewId = itemView.getId();
             this.messageText = itemView.findViewById(R.id.textView_message);
+            this.messageTime = itemView.findViewById(R.id.textView_messageTime);
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(messageTime.getVisibility() != View.VISIBLE){
+//                        messageTime.animate().translationY(-100);
+                        messageTime.setVisibility(View.VISIBLE);
+                    } else {
+                        messageTime.setVisibility(View.GONE);
+                    }
+                }
+            });
         }
     }
 }
