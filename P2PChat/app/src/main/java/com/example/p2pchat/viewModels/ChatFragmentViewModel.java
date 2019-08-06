@@ -74,8 +74,8 @@ public class ChatFragmentViewModel extends ViewModel {
         messageToSend.setMessageTime(Calendar.getInstance().getTime().toString());
 //        messageToSend.setMessageId(sessionLiveData.getValue().getSessionId());
         messageToSend.setSessionId(sessionId);
-//        messageToSend.setMessageStatus(MessageStatus.PENDING);
-        messageToSend.setMessageStatus(MessageStatus.RECEIVED);
+        messageToSend.setMessageStatus(MessageStatus.PENDING);
+//        messageToSend.setMessageStatus(MessageStatus.RECEIVED);
 
 //        Log.d(TAG, "sendMessage: session data: " + sessionLiveData.getValue());
 //        Log.d(TAG, "sendMessage: message data:" + messagesListLiveData.getValue());
