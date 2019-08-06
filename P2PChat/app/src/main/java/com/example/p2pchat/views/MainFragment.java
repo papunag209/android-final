@@ -46,6 +46,7 @@ public class MainFragment extends Fragment {
     MainFragmentViewModel mainFragmentViewModel;
     Button btn;
     P2pController p2pController;
+    Button cancelSearchButton;
 
 
     public MainFragment() {
@@ -65,6 +66,15 @@ public class MainFragment extends Fragment {
         View view;
         view = inflater.inflate(R.layout.fragment_main, container, false);
         recyclerView = view.findViewById(R.id.recyclerView_chatPeers);
+        cancelSearchButton = view.findViewById(R.id.button_cancelLoading);
+        if(cancelSearchButton != null) {
+            cancelSearchButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    navController.navigate(R.id.historyFragment);
+                }
+            });
+        }
         return view;
     }
 

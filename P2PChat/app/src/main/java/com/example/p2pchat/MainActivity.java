@@ -167,7 +167,9 @@ public class MainActivity extends AppCompatActivity
 //        removeConnection();
         Log.d(TAG, "onResume: SHEMOVEDI ONRESUMESHI");
         registerReceiver(wReceiver, wFilter);
-        discoverPeers();
+        if(wChannel != null && wManager != null) {
+            discoverPeers();
+        }
     }
 
     private void closeSockets(){
@@ -404,7 +406,7 @@ public class MainActivity extends AppCompatActivity
 
                 }else {
                     ConstraintLayout overlay = findViewById(R.id.constraintLayout_mainFragmentOverlay);
-                    overlay.setVisibility(View.GONE);
+                    overlay.setVisibility(View.INVISIBLE);
 
                     ArrayList<WifiP2pDevice> peerList = new ArrayList<WifiP2pDevice>();
                     for (WifiP2pDevice device : wifiP2pDevices) {
